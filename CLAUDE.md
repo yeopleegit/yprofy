@@ -17,8 +17,9 @@ yproficiency/
 ├── server/               # Express API (port 3001)
 │   └── src/
 │       ├── index.ts      # 엔트리 (async init for sql.js)
+│       ├── seed.ts       # 데모 시드 데이터
 │       ├── db/           # connection.ts, helpers.ts, schema.sql
-│       └── routes/       # categories, items, skills, sessions, dashboard
+│       └── routes/       # categories, items, skills, sessions, dashboard, data
 ├── client/               # Vite React app (port 5173)
 │   └── src/
 │       ├── api/client.ts # fetch wrapper for /api/v1
@@ -31,9 +32,10 @@ yproficiency/
 ## Commands
 
 ```bash
-npm run dev          # 서버 + 클라이언트 동시 실행 (concurrently)
-npm run dev:server   # 서버만 실행 (port 3001)
-npm run dev:client   # 클라이언트만 실행 (port 5173)
+npm run dev              # 서버 + 클라이언트 동시 실행 (concurrently)
+npm run dev:server       # 서버만 실행 (port 3001)
+npm run dev:client       # 클라이언트만 실행 (port 5173)
+npm run seed -w server   # 데모 시드 데이터 생성
 ```
 
 ## Data Model
@@ -57,6 +59,7 @@ CASCADE 삭제 적용. 카테고리 삭제 시 하위 데이터 전부 삭제됨
 - `GET/POST /skills/:skillId/sessions`, `PUT/DELETE /sessions/:id`
 - `GET /dashboard/summary` — 전체 decay 상태 포함 대시보드
 - `GET /dashboard/stats/frequency?skillId=&period=` — 연습 빈도 통계
+- `GET /data/export`, `POST /data/import` — JSON 데이터 백업/복원
 
 ## Decay Logic
 
@@ -77,3 +80,6 @@ DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 - Tailwind v4 사용 — `@import "tailwindcss"` 방식 (tailwind.config.js 없음)
 - sql.js는 비동기 초기화 필요 → `initDb()` 후 서버 시작
 - 매 write 작업마다 `saveDb()`로 디스크에 flush
+- 반응형 디자인: lg(1024px) 기준, 모바일에서 햄버거 메뉴 + 슬라이드 사이드바
+- 삭제 작업은 ConfirmDialog로 확인 후 실행
+- GitHub repo: https://github.com/yeopleegit/yproficiency
