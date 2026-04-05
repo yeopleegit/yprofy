@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Star } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -17,11 +17,6 @@ export default function SessionFormModal({ skillId: initialSkillId, onClose }: P
   const [duration, setDuration] = useState('')
   const [rating, setRating] = useState<number>(0)
   const [notes, setNotes] = useState('')
-
-  const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: api.getCategories,
-  })
 
   // Build a flat skill list from dashboard data
   const { data: dashboard } = useQuery({

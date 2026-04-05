@@ -5,7 +5,7 @@ import { Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../api/client'
 import StatusBadge from '../components/shared/StatusBadge'
-import { getDecayStatus } from '../lib/decay'
+import ConfirmDialog from '../components/shared/ConfirmDialog'
 
 interface Props {
   onLogSession: (skillId?: number) => void
@@ -18,6 +18,8 @@ export default function CategoryPage({ onLogSession }: Props) {
   const [newItemName, setNewItemName] = useState('')
   const [addingSkillTo, setAddingSkillTo] = useState<number | null>(null)
   const [newSkillName, setNewSkillName] = useState('')
+  const [deleteItemTarget, setDeleteItemTarget] = useState<{ id: number; name: string } | null>(null)
+  const [deleteSkillTarget, setDeleteSkillTarget] = useState<{ id: number; name: string } | null>(null)
 
   const { data: category, isLoading } = useQuery({
     queryKey: ['category', id],
@@ -25,51 +27,36 @@ export default function CategoryPage({ onLogSession }: Props) {
     enabled: !!id,
   })
 
-  // Get dashboard data for decay status
   const { data: dashboard } = useQuery({
     queryKey: ['dashboard'],
     queryFn: api.getDashboard,
   })
 
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['category', id] })
+    queryClient.invalidateQueries({ queryKey: ['categories'] })
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+  }
+
   const addItemMutation = useMutation({
     mutationFn: () => api.createItem(Number(id), { name: newItemName }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['category', id] })
-      queryClient.invalidateQueries({ queryKey: ['categories'] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      setNewItemName('')
-      toast.success('Item added!')
-    },
+    onSuccess: () => { invalidateAll(); setNewItemName(''); toast.success('Item added!') },
   })
 
   const deleteItemMutation = useMutation({
     mutationFn: (itemId: number) => api.deleteItem(itemId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['category', id] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      toast.success('Item deleted')
-    },
+    onSuccess: () => { invalidateAll(); setDeleteItemTarget(null); toast.success('Item deleted') },
   })
 
   const addSkillMutation = useMutation({
     mutationFn: ({ itemId, name }: { itemId: number; name: string }) =>
       api.createSkill(itemId, { name }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['category', id] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      setNewSkillName('')
-      setAddingSkillTo(null)
-      toast.success('Skill added!')
-    },
+    onSuccess: () => { invalidateAll(); setNewSkillName(''); setAddingSkillTo(null); toast.success('Skill added!') },
   })
 
   const deleteSkillMutation = useMutation({
     mutationFn: (skillId: number) => api.deleteSkill(skillId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['category', id] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      toast.success('Skill deleted')
-    },
+    onSuccess: () => { invalidateAll(); setDeleteSkillTarget(null); toast.success('Skill deleted') },
   })
 
   const toggleItem = (itemId: number) => {
@@ -80,7 +67,6 @@ export default function CategoryPage({ onLogSession }: Props) {
     })
   }
 
-  // Find skill status from dashboard data
   const getSkillStatus = (skillId: number) => {
     if (!dashboard?.categories) return null
     for (const cat of dashboard.categories) {
@@ -160,7 +146,7 @@ export default function CategoryPage({ onLogSession }: Props) {
                     </span>
                   </div>
                   <button
-                    onClick={e => { e.stopPropagation(); deleteItemMutation.mutate(item.id) }}
+                    onClick={e => { e.stopPropagation(); setDeleteItemTarget({ id: item.id, name: item.name }) }}
                     className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"
                   >
                     <Trash2 size={14} />
@@ -191,7 +177,7 @@ export default function CategoryPage({ onLogSession }: Props) {
                               Log
                             </button>
                             <button
-                              onClick={() => deleteSkillMutation.mutate(skill.id)}
+                              onClick={() => setDeleteSkillTarget({ id: skill.id, name: skill.name })}
                               className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"
                             >
                               <Trash2 size={12} />
@@ -242,6 +228,26 @@ export default function CategoryPage({ onLogSession }: Props) {
             )
           })}
         </div>
+      )}
+
+      {/* Delete Item Confirm */}
+      {deleteItemTarget && (
+        <ConfirmDialog
+          title="Delete Item"
+          message={`"${deleteItemTarget.name}" and all its skills and session records will be permanently deleted.`}
+          onConfirm={() => deleteItemMutation.mutate(deleteItemTarget.id)}
+          onCancel={() => setDeleteItemTarget(null)}
+        />
+      )}
+
+      {/* Delete Skill Confirm */}
+      {deleteSkillTarget && (
+        <ConfirmDialog
+          title="Delete Skill"
+          message={`"${deleteSkillTarget.name}" and all its session records will be permanently deleted.`}
+          onConfirm={() => deleteSkillMutation.mutate(deleteSkillTarget.id)}
+          onCancel={() => setDeleteSkillTarget(null)}
+        />
       )}
     </div>
   )

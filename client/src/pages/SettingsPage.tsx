@@ -1,17 +1,21 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Trash2, Edit2, Check, X } from 'lucide-react'
+import { Plus, Trash2, Edit2, Check, X, Download, Upload } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../api/client'
+import ConfirmDialog from '../components/shared/ConfirmDialog'
 
 export default function SettingsPage() {
   const queryClient = useQueryClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
   const [newIcon, setNewIcon] = useState('')
   const [newDecay, setNewDecay] = useState('14')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editData, setEditData] = useState({ name: '', description: '', icon: '', decay_days: 14 })
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null)
+  const [importConfirm, setImportConfirm] = useState<any>(null)
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -48,13 +52,63 @@ export default function SettingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      setDeleteTarget(null)
       toast.success('Category deleted')
+    },
+  })
+
+  const importMutation = useMutation({
+    mutationFn: (data: any) => api.importData(data),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries()
+      setImportConfirm(null)
+      toast.success(`Imported: ${result.counts.categories} categories, ${result.counts.skills} skills, ${result.counts.sessions} sessions`)
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Import failed')
     },
   })
 
   const startEdit = (cat: any) => {
     setEditingId(cat.id)
     setEditData({ name: cat.name, description: cat.description || '', icon: cat.icon || '', decay_days: cat.decay_days })
+  }
+
+  const handleExport = async () => {
+    try {
+      const data = await api.exportData()
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `yproficiency-backup-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Data exported!')
+    } catch {
+      toast.error('Export failed')
+    }
+  }
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string)
+        if (!data?.data?.categories) {
+          toast.error('Invalid backup file format')
+          return
+        }
+        setImportConfirm(data)
+      } catch {
+        toast.error('Failed to parse file')
+      }
+    }
+    reader.readAsText(file)
+    // Reset input so the same file can be selected again
+    e.target.value = ''
   }
 
   return (
@@ -66,7 +120,7 @@ export default function SettingsPage() {
         <h2 className="text-sm font-semibold text-gray-700 mb-3">New Category</h2>
         <form
           onSubmit={e => { e.preventDefault(); if (newName.trim()) createMutation.mutate() }}
-          className="grid grid-cols-2 gap-3"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-3"
         >
           <input
             value={newName}
@@ -120,7 +174,7 @@ export default function SettingsPage() {
             {categories.map((cat: any) => (
               <div key={cat.id} className="px-4 py-3">
                 {editingId === cat.id ? (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       value={editData.name}
                       onChange={e => setEditData({ ...editData, name: e.target.value })}
@@ -177,7 +231,7 @@ export default function SettingsPage() {
                         <Edit2 size={14} />
                       </button>
                       <button
-                        onClick={() => deleteMutation.mutate(cat.id)}
+                        onClick={() => setDeleteTarget({ id: cat.id, name: cat.name })}
                         className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"
                       >
                         <Trash2 size={14} />
@@ -194,8 +248,52 @@ export default function SettingsPage() {
       {/* Data Export/Import */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <h2 className="text-sm font-semibold text-gray-700 mb-3">Data Management</h2>
-        <p className="text-xs text-gray-500">Export/Import functionality coming soon.</p>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+          >
+            <Download size={16} /> Export JSON
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700"
+          >
+            <Upload size={16} /> Import JSON
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImportFile}
+            className="hidden"
+          />
+        </div>
+        <p className="text-xs text-gray-400 mt-2">
+          Import will replace all existing data. Export first to create a backup.
+        </p>
       </div>
+
+      {/* Delete Confirm Dialog */}
+      {deleteTarget && (
+        <ConfirmDialog
+          title="Delete Category"
+          message={`"${deleteTarget.name}" and all its items, skills, and session records will be permanently deleted. This cannot be undone.`}
+          onConfirm={() => deleteMutation.mutate(deleteTarget.id)}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+
+      {/* Import Confirm Dialog */}
+      {importConfirm && (
+        <ConfirmDialog
+          title="Import Data"
+          message={`This will replace ALL existing data with the imported file (${importConfirm.data.categories.length} categories, ${importConfirm.data.skills.length} skills, ${importConfirm.data.sessions.length} sessions). This cannot be undone.`}
+          confirmLabel="Import"
+          onConfirm={() => importMutation.mutate(importConfirm)}
+          onCancel={() => setImportConfirm(null)}
+        />
+      )}
     </div>
   )
 }

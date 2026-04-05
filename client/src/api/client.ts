@@ -48,4 +48,8 @@ export const api = {
     if (params?.period) qs.set('period', String(params.period));
     return request<any[]>(`/dashboard/stats/frequency?${qs}`);
   },
+
+  // Data export/import
+  exportData: () => request<any>('/data/export'),
+  importData: (data: any) => request<any>('/data/import', { method: 'POST', body: JSON.stringify(data) }),
 };
