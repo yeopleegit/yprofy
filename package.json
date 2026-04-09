@@ -2,14 +2,28 @@
   "name": "yproficiency",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["server", "client", "shared"],
+  "type": "module",
+  "workspaces": [
+    "server",
+    "client",
+    "shared"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
     "dev:server": "npm run dev -w server",
     "dev:client": "npm run dev -w client",
-    "build": "npm run build -w client && npm run build -w server"
+    "dev:vercel": "vercel dev",
+    "build": "npm run build -w client && npm run build -w server",
+    "seed": "tsx scripts/seed.ts"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@vercel/node": "5.7.2",
+    "concurrently": "^9.1.2",
+    "tsx": "4.21.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.102.1",
+    "dotenv": "17.4.1",
+    "zod": "4.3.6"
   }
 }

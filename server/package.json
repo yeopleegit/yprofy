@@ -9,9 +9,10 @@
     "seed": "tsx src/seed.ts"
   },
   "dependencies": {
-    "sql.js": "^1.11.0",
+    "@supabase/supabase-js": "2.102.1",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "sql.js": "^1.11.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {

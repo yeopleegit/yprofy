@@ -5,19 +5,27 @@
 ## Tech Stack
 
 - **Frontend:** React + Vite + TypeScript + Tailwind CSS v4
-- **Backend:** Node.js + Express + TypeScript
-- **DB:** SQLite via sql.js (순수 JS, 네이티브 컴파일 불필요)
-- **Key Libraries:** @tanstack/react-query, recharts, react-router-dom, lucide-react, date-fns, zod, react-hot-toast
+- **Backend (로컬):** Node.js + Express + TypeScript + SQLite (sql.js)
+- **Backend (배포):** Vercel Serverless Functions + Supabase (PostgreSQL)
+- **Key Libraries:** @tanstack/react-query, recharts, react-router-dom, lucide-react, date-fns, zod, react-hot-toast, @supabase/supabase-js
 
 ## Project Structure
 
 ```
 yproficiency/
 ├── package.json          # npm workspaces root
-├── server/               # Express API (port 3001)
+├── api/                  # Vercel serverless (배포용)
+│   └── handler.ts        # 단일 catch-all API handler (모든 /api/v1/* 라우트)
+├── lib/
+│   └── supabase.ts       # Supabase 클라이언트
+├── supabase/
+│   └── schema.sql        # PostgreSQL 스키마 + RPC 함수
+├── scripts/
+│   └── seed.ts           # Supabase 시드 스크립트
+├── server/               # Express API (로컬 개발용, port 3001)
 │   └── src/
 │       ├── index.ts      # 엔트리 (async init for sql.js)
-│       ├── seed.ts       # 데모 시드 데이터
+│       ├── seed.ts       # 로컬 데모 시드 데이터
 │       ├── db/           # connection.ts, helpers.ts, schema.sql
 │       └── routes/       # categories, items, skills, sessions, dashboard, data
 ├── client/               # Vite React app (port 5173)
@@ -26,16 +34,19 @@ yproficiency/
 │       ├── components/   # shared/, sessions/
 │       ├── pages/        # DashboardPage, CategoryPage, SettingsPage
 │       └── lib/decay.ts  # decay 계산 로직
-└── shared/types.ts       # 공유 TypeScript 타입
+├── shared/types.ts       # 공유 TypeScript 타입
+└── vercel.json           # Vercel 빌드/라우팅 설정
 ```
 
 ## Commands
 
 ```bash
-npm run dev              # 서버 + 클라이언트 동시 실행 (concurrently)
-npm run dev:server       # 서버만 실행 (port 3001)
-npm run dev:client       # 클라이언트만 실행 (port 5173)
-npm run seed -w server   # 데모 시드 데이터 생성
+npm run dev              # 로컬: 서버 + 클라이언트 동시 실행 (concurrently)
+npm run dev:server       # 로컬: 서버만 실행 (port 3001)
+npm run dev:client       # 로컬: 클라이언트만 실행 (port 5173)
+npm run seed -w server   # 로컬: 데모 시드 데이터 생성
+npm run seed             # Supabase: 시드 데이터 생성
+vercel --prod            # Vercel 프로덕션 배포
 ```
 
 ## Data Model
@@ -70,9 +81,17 @@ CASCADE 삭제 적용. 카테고리 삭제 시 하위 데이터 전부 삭제됨
 
 ## DB
 
+### 로컬 (SQLite)
 sql.js 사용 (better-sqlite3는 Windows에서 node-gyp/Python 필요하여 사용 불가).
 DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 `server/src/db/helpers.ts`에 queryAll, queryOne, execute, insert 헬퍼 함수 제공.
+
+### 배포 (Supabase PostgreSQL)
+- `supabase/schema.sql`: 테이블, 인덱스, RLS 정책, RPC 함수 (dashboard_summary, dashboard_stats, most_stale_skill, session_frequency)
+- `lib/supabase.ts`: @supabase/supabase-js 클라이언트
+- `api/handler.ts`: 단일 Vercel serverless function, 내부 라우터로 모든 API 분기
+- 환경변수: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (`.env.local` / Vercel 환경변수)
+- RLS: 개인 앱이므로 모든 테이블에 퍼블릭 접근 허용
 
 ## Dark Mode
 
@@ -104,3 +123,5 @@ DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 - 삭제 작업은 ConfirmDialog로 확인 후 실행
 - Item/Skill 복사: "Copy of {이름}"으로 생성, 세션 미복사 (Stale 초기화)
 - GitHub repo: https://github.com/yeopleegit/yproficiency
+- 배포 URL: https://yprofy.vercel.app
+- Vercel rewrite로 `/api/v1/*` → `/api/handler?__path=*` 라우팅 (Hobby 플랜 12개 함수 제한 회피)
