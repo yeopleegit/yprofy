@@ -40,8 +40,8 @@ router.post('/', (req, res) => {
 
   const { name, description, icon, decay_days } = result.data;
   const id = insert(
-    'INSERT INTO categories (name, description, icon, decay_days) VALUES (?, ?, ?, ?)',
-    [name, description ?? null, icon ?? null, decay_days ?? 14]
+    'INSERT INTO categories (name, description, icon, decay_days, user_id) VALUES (?, ?, ?, ?, ?)',
+    [name, description ?? null, icon ?? null, decay_days ?? 14, 'local-dev-user']
   );
   const category = queryOne('SELECT * FROM categories WHERE id = ?', [id]);
   res.status(201).json(category);

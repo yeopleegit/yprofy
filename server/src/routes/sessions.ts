@@ -43,8 +43,8 @@ router.post('/skills/:skillId/sessions', (req, res) => {
 
   const { practiced_at, duration_minutes, rating, notes } = result.data;
   const id = insert(
-    'INSERT INTO sessions (skill_id, practiced_at, duration_minutes, rating, notes) VALUES (?, ?, ?, ?, ?)',
-    [Number(req.params.skillId), practiced_at, duration_minutes ?? null, rating ?? null, notes ?? null]
+    'INSERT INTO sessions (skill_id, practiced_at, duration_minutes, rating, notes, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+    [Number(req.params.skillId), practiced_at, duration_minutes ?? null, rating ?? null, notes ?? null, 'local-dev-user']
   );
 
   const session = queryOne('SELECT * FROM sessions WHERE id = ?', [id]);

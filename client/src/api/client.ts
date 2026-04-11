@@ -1,9 +1,19 @@
+import { supabase } from '../lib/supabase';
+
 const BASE = '/api/v1';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers: { ...headers, ...options?.headers },
   });
   if (res.status === 204) return undefined as T;
   if (!res.ok) {

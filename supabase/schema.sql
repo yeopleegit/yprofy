@@ -7,6 +7,7 @@
 
 CREATE TABLE categories (
     id          SERIAL PRIMARY KEY,
+    user_id     UUID NOT NULL REFERENCES auth.users(id),
     name        TEXT NOT NULL,
     description TEXT,
     icon        TEXT,
@@ -17,6 +18,7 @@ CREATE TABLE categories (
 
 CREATE TABLE items (
     id          SERIAL PRIMARY KEY,
+    user_id     UUID NOT NULL REFERENCES auth.users(id),
     category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
     name        TEXT NOT NULL,
     description TEXT,
@@ -27,6 +29,7 @@ CREATE TABLE items (
 
 CREATE TABLE skills (
     id                    SERIAL PRIMARY KEY,
+    user_id               UUID NOT NULL REFERENCES auth.users(id),
     item_id               INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
     name                  TEXT NOT NULL,
     description           TEXT,
@@ -38,6 +41,7 @@ CREATE TABLE skills (
 
 CREATE TABLE sessions (
     id               SERIAL PRIMARY KEY,
+    user_id          UUID NOT NULL REFERENCES auth.users(id),
     skill_id         INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
     practiced_at     TEXT NOT NULL,
     duration_minutes INTEGER,
@@ -48,9 +52,13 @@ CREATE TABLE sessions (
 
 -- 2. 인덱스
 
+CREATE INDEX idx_categories_user ON categories(user_id);
 CREATE INDEX idx_items_category ON items(category_id);
+CREATE INDEX idx_items_user ON items(user_id);
 CREATE INDEX idx_skills_item ON skills(item_id);
+CREATE INDEX idx_skills_user ON skills(user_id);
 CREATE INDEX idx_sessions_skill ON sessions(skill_id);
+CREATE INDEX idx_sessions_user ON sessions(user_id);
 CREATE INDEX idx_sessions_practiced_at ON sessions(practiced_at);
 
 -- 3. updated_at 자동 갱신 트리거
@@ -103,6 +111,7 @@ BEGIN
     LEFT JOIN items i ON i.category_id = c.id
     LEFT JOIN skills s ON s.item_id = i.id
     LEFT JOIN sessions se ON se.skill_id = s.id
+    WHERE c.user_id = auth.uid()
     GROUP BY c.id, c.name, c.icon, c.decay_days, i.id, i.name, s.id, s.name, s.decay_days
     ORDER BY c.name, i.name, s.name;
 END;
@@ -120,10 +129,10 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT
-        (SELECT COUNT(*) FROM categories),
-        (SELECT COUNT(*) FROM skills),
-        (SELECT COUNT(*) FROM sessions),
-        (SELECT COUNT(*) FROM sessions WHERE practiced_at >= (today_date::DATE - INTERVAL '7 days')::TEXT);
+        (SELECT COUNT(*) FROM categories WHERE user_id = auth.uid()),
+        (SELECT COUNT(*) FROM skills WHERE user_id = auth.uid()),
+        (SELECT COUNT(*) FROM sessions WHERE user_id = auth.uid()),
+        (SELECT COUNT(*) FROM sessions WHERE user_id = auth.uid() AND practiced_at >= (today_date::DATE - INTERVAL '7 days')::TEXT);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -144,6 +153,7 @@ BEGIN
     JOIN items i ON i.id = s.item_id
     JOIN categories c ON c.id = i.category_id
     LEFT JOIN sessions se ON se.skill_id = s.id
+    WHERE c.user_id = auth.uid()
     GROUP BY s.id, s.name, i.name, c.name
     ORDER BY CASE WHEN MAX(se.practiced_at) IS NULL THEN 999999
              ELSE (today_date::DATE - MAX(se.practiced_at)::DATE)::INTEGER END DESC
@@ -164,6 +174,7 @@ BEGIN
         SELECT se.practiced_at::DATE::TEXT, COUNT(*)
         FROM sessions se
         WHERE se.skill_id = p_skill_id
+          AND se.user_id = auth.uid()
           AND se.practiced_at >= (CURRENT_DATE - (p_days || ' days')::INTERVAL)::TEXT
         GROUP BY se.practiced_at::DATE
         ORDER BY se.practiced_at::DATE;
@@ -171,21 +182,37 @@ BEGIN
         RETURN QUERY
         SELECT se.practiced_at::DATE::TEXT, COUNT(*)
         FROM sessions se
-        WHERE se.practiced_at >= (CURRENT_DATE - (p_days || ' days')::INTERVAL)::TEXT
+        WHERE se.user_id = auth.uid()
+          AND se.practiced_at >= (CURRENT_DATE - (p_days || ' days')::INTERVAL)::TEXT
         GROUP BY se.practiced_at::DATE
         ORDER BY se.practiced_at::DATE;
     END IF;
 END;
 $$ LANGUAGE plpgsql;
 
--- 8. Row Level Security (RLS) - 퍼블릭 접근 허용 (개인 앱)
+-- 8. Row Level Security (RLS)
 
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow all on categories" ON categories FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all on items" ON items FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all on skills" ON skills FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all on sessions" ON sessions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "own_select" ON categories FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "own_insert" ON categories FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "own_update" ON categories FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "own_delete" ON categories FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "own_select" ON items FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "own_insert" ON items FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "own_update" ON items FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "own_delete" ON items FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "own_select" ON skills FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "own_insert" ON skills FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "own_update" ON skills FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "own_delete" ON skills FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "own_select" ON sessions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "own_insert" ON sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "own_update" ON sessions FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "own_delete" ON sessions FOR DELETE USING (auth.uid() = user_id);

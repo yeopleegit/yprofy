@@ -6,7 +6,7 @@ const router = Router();
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
+  description: z.string().max(500).nullable().optional(),
   decay_days: z.number().int().min(1).max(365).optional(),
   target_frequency_days: z.number().int().min(1).max(365).optional(),
 });
@@ -29,8 +29,8 @@ router.post('/items/:itemId/skills', (req, res) => {
 
   const { name, description, decay_days, target_frequency_days } = result.data;
   const id = insert(
-    'INSERT INTO skills (item_id, name, description, decay_days, target_frequency_days) VALUES (?, ?, ?, ?, ?)',
-    [Number(req.params.itemId), name, description ?? null, decay_days ?? null, target_frequency_days ?? null]
+    'INSERT INTO skills (item_id, name, description, decay_days, target_frequency_days, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+    [Number(req.params.itemId), name, description ?? null, decay_days ?? null, target_frequency_days ?? null, 'local-dev-user']
   );
 
   const skill = queryOne('SELECT * FROM skills WHERE id = ?', [id]);
@@ -61,8 +61,8 @@ router.post('/skills/:id/copy', (req, res) => {
   if (!existing) return res.status(404).json({ error: 'Skill not found' });
 
   const newId = insert(
-    'INSERT INTO skills (item_id, name, description, decay_days, target_frequency_days) VALUES (?, ?, ?, ?, ?)',
-    [existing.item_id, `Copy of ${existing.name}`, existing.description, existing.decay_days, existing.target_frequency_days]
+    'INSERT INTO skills (item_id, name, description, decay_days, target_frequency_days, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+    [existing.item_id, `Copy of ${existing.name}`, existing.description, existing.decay_days, existing.target_frequency_days, 'local-dev-user']
   );
 
   const skill = queryOne('SELECT * FROM skills WHERE id = ?', [newId]);

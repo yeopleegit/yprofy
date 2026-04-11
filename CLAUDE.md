@@ -19,7 +19,8 @@ yproficiency/
 ├── lib/
 │   └── supabase.ts       # Supabase 클라이언트
 ├── supabase/
-│   └── schema.sql        # PostgreSQL 스키마 + RPC 함수
+│   ├── schema.sql        # PostgreSQL 스키마 + RPC 함수
+│   └── migrations/       # DB 마이그레이션 SQL
 ├── scripts/
 │   └── seed.ts           # Supabase 시드 스크립트
 ├── server/               # Express API (로컬 개발용, port 3001)
@@ -31,9 +32,10 @@ yproficiency/
 ├── client/               # Vite React app (port 5173)
 │   └── src/
 │       ├── api/client.ts # fetch wrapper for /api/v1
-│       ├── components/   # shared/, sessions/
-│       ├── pages/        # DashboardPage, CategoryPage, SettingsPage
-│       └── lib/decay.ts  # decay 계산 로직
+│       ├── components/   # shared/, sessions/, auth/
+│       ├── contexts/     # AuthContext.tsx
+│       ├── pages/        # DashboardPage, CategoryPage, SettingsPage, LoginPage
+│       └── lib/          # decay.ts, supabase.ts (브라우저용)
 ├── shared/types.ts       # 공유 TypeScript 타입
 └── vercel.json           # Vercel 빌드/라우팅 설정
 ```
@@ -88,10 +90,21 @@ DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 
 ### 배포 (Supabase PostgreSQL)
 - `supabase/schema.sql`: 테이블, 인덱스, RLS 정책, RPC 함수 (dashboard_summary, dashboard_stats, most_stale_skill, session_frequency)
-- `lib/supabase.ts`: @supabase/supabase-js 클라이언트
-- `api/handler.ts`: 단일 Vercel serverless function, 내부 라우터로 모든 API 분기
-- 환경변수: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (`.env.local` / Vercel 환경변수)
-- RLS: 개인 앱이므로 모든 테이블에 퍼블릭 접근 허용
+- `lib/supabase.ts`: @supabase/supabase-js 클라이언트 + `createAuthClient()` 팩토리
+- `api/handler.ts`: 단일 Vercel serverless function, JWT 인증 + 내부 라우터로 모든 API 분기
+- 환경변수: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (`.env.local` / Vercel 환경변수)
+- RLS: `auth.uid() = user_id` 기반 사용자별 데이터 격리
+
+## Authentication
+
+- **Supabase Auth + Google OAuth** 기반 다중 사용자 지원
+- `client/src/contexts/AuthContext.tsx`: 인증 컨텍스트 (signInWithGoogle, signOut, user/session 상태)
+- `client/src/lib/supabase.ts`: 브라우저용 Supabase 클라이언트 (VITE_ 환경변수 사용)
+- `client/src/pages/LoginPage.tsx`: Google 로그인 페이지
+- `client/src/components/auth/ProtectedRoute.tsx`: 미인증 시 /login 리다이렉트
+- API 요청 시 `Authorization: Bearer <token>` 헤더 자동 첨부 (client/src/api/client.ts)
+- 모든 테이블에 `user_id` 컬럼 → RLS로 자동 필터링
+- 로컬 개발 서버는 인증 없이 `user_id = 'local-dev-user'` 사용
 
 ## Dark Mode
 

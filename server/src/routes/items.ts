@@ -6,7 +6,7 @@ const router = Router();
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
+  description: z.string().max(500).nullable().optional(),
   icon: z.string().max(10).optional(),
 });
 
@@ -37,8 +37,8 @@ router.post('/categories/:catId/items', (req, res) => {
 
   const { name, description, icon } = result.data;
   const id = insert(
-    'INSERT INTO items (category_id, name, description, icon) VALUES (?, ?, ?, ?)',
-    [Number(req.params.catId), name, description ?? null, icon ?? null]
+    'INSERT INTO items (category_id, name, description, icon, user_id) VALUES (?, ?, ?, ?, ?)',
+    [Number(req.params.catId), name, description ?? null, icon ?? null, 'local-dev-user']
   );
 
   const item = queryOne('SELECT * FROM items WHERE id = ?', [id]);
@@ -69,16 +69,16 @@ router.post('/items/:id/copy', (req, res) => {
   if (!existing) return res.status(404).json({ error: 'Item not found' });
 
   const newId = insert(
-    'INSERT INTO items (category_id, name, description, icon) VALUES (?, ?, ?, ?)',
-    [existing.category_id, `Copy of ${existing.name}`, existing.description, existing.icon]
+    'INSERT INTO items (category_id, name, description, icon, user_id) VALUES (?, ?, ?, ?, ?)',
+    [existing.category_id, `Copy of ${existing.name}`, existing.description, existing.icon, 'local-dev-user']
   );
 
   // Copy all skills (without sessions)
   const skills = queryAll('SELECT * FROM skills WHERE item_id = ?', [Number(req.params.id)]);
   for (const skill of skills) {
     insert(
-      'INSERT INTO skills (item_id, name, description, decay_days, target_frequency_days) VALUES (?, ?, ?, ?, ?)',
-      [newId, skill.name, skill.description, skill.decay_days, skill.target_frequency_days]
+      'INSERT INTO skills (item_id, name, description, decay_days, target_frequency_days, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [newId, skill.name, skill.description, skill.decay_days, skill.target_frequency_days, 'local-dev-user']
     );
   }
 

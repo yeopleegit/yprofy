@@ -1,10 +1,13 @@
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, FolderOpen, Settings, Plus, Menu, X, Moon, Sun } from 'lucide-react'
+import { LayoutDashboard, FolderOpen, Settings, Plus, Menu, X, Moon, Sun, LogOut } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from './api/client'
 import DashboardPage from './pages/DashboardPage'
 import CategoryPage from './pages/CategoryPage'
 import SettingsPage from './pages/SettingsPage'
+import LoginPage from './pages/LoginPage'
+import ProtectedRoute from './components/auth/ProtectedRoute'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useState, useEffect } from 'react'
 import SessionFormModal from './components/sessions/SessionFormModal'
 
@@ -23,8 +26,9 @@ function useDarkMode() {
   return [dark, () => setDark(d => !d)] as const
 }
 
-function App() {
+function AppLayout() {
   const location = useLocation()
+  const { user, signOut } = useAuth()
   const [sessionModalOpen, setSessionModalOpen] = useState(false)
   const [sessionSkillId, setSessionSkillId] = useState<number | undefined>()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -49,6 +53,9 @@ function App() {
     { path: '/', icon: LayoutDashboard, label: '대시보드' },
     { path: '/settings', icon: Settings, label: '설정' },
   ]
+
+  const avatarUrl = user?.user_metadata?.avatar_url
+  const displayName = user?.user_metadata?.full_name || user?.email || ''
 
   const sidebarContent = (
     <>
@@ -121,7 +128,7 @@ function App() {
         )}
       </nav>
 
-      <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+      <div className="p-3 space-y-2 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={() => openSessionModal()}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
@@ -129,6 +136,22 @@ function App() {
           <Plus size={16} />
           연습 기록
         </button>
+
+        <div className="flex items-center gap-2 px-2 py-1.5">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="w-6 h-6 rounded-full" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-gray-300 dark:bg-gray-600" />
+          )}
+          <span className="flex-1 text-xs text-gray-600 dark:text-gray-400 truncate">{displayName}</span>
+          <button
+            onClick={signOut}
+            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            title="로그아웃"
+          >
+            <LogOut size={14} />
+          </button>
+        </div>
       </div>
     </>
   )
@@ -191,6 +214,21 @@ function App() {
         />
       )}
     </div>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/*" element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </AuthProvider>
   )
 }
 

@@ -89,14 +89,14 @@ export default function CategoryPage({ onLogSession }: Props) {
   })
 
   const updateItemMutation = useMutation({
-    mutationFn: ({ id, ...data }: { id: number; name: string; description?: string; icon?: string }) =>
+    mutationFn: ({ id, ...data }: { id: number; name: string; description?: string | null; icon?: string }) =>
       api.updateItem(id, data),
     onSuccess: () => { invalidateAll(); setEditItem(null); toast.success('아이템을 수정했습니다') },
     onError: (err: any) => toast.error(err.message || '아이템 수정에 실패했습니다'),
   })
 
   const updateSkillMutation = useMutation({
-    mutationFn: ({ id, ...data }: { id: number; name: string; description?: string; decay_days?: number }) =>
+    mutationFn: ({ id, ...data }: { id: number; name: string; description?: string | null; decay_days?: number }) =>
       api.updateSkill(id, data),
     onSuccess: () => { invalidateAll(); setEditSkill(null); toast.success('스킬을 수정했습니다') },
     onError: (err: any) => toast.error(err.message || '스킬 수정에 실패했습니다'),
@@ -339,7 +339,7 @@ export default function CategoryPage({ onLogSession }: Props) {
               updateItemMutation.mutate({
                 id: editItem.id,
                 name: editItem.name.trim(),
-                description: editItem.description.trim() || undefined,
+                description: editItem.description.trim() || null,
                 icon: editItem.icon.trim() || undefined,
               })
             }}
@@ -397,7 +397,7 @@ export default function CategoryPage({ onLogSession }: Props) {
               updateSkillMutation.mutate({
                 id: editSkill.id,
                 name: editSkill.name.trim(),
-                description: editSkill.description.trim() || undefined,
+                description: editSkill.description.trim() || null,
                 decay_days: editSkill.decay_days ? Number(editSkill.decay_days) : undefined,
               })
             }}

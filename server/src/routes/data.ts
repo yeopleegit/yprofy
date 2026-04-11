@@ -38,26 +38,26 @@ router.post('/import', (req, res) => {
 
     for (const c of data.categories) {
       db.run(
-        'INSERT INTO categories (id, name, description, icon, decay_days, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [c.id, c.name, c.description, c.icon, c.decay_days, c.created_at, c.updated_at]
+        'INSERT INTO categories (id, name, description, icon, decay_days, created_at, updated_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [c.id, c.name, c.description, c.icon, c.decay_days, c.created_at, c.updated_at, 'local-dev-user']
       );
     }
     for (const i of data.items) {
       db.run(
-        'INSERT INTO items (id, category_id, name, description, icon, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [i.id, i.category_id, i.name, i.description, i.icon, i.created_at, i.updated_at]
+        'INSERT INTO items (id, category_id, name, description, icon, created_at, updated_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [i.id, i.category_id, i.name, i.description, i.icon, i.created_at, i.updated_at, 'local-dev-user']
       );
     }
     for (const s of data.skills) {
       db.run(
-        'INSERT INTO skills (id, item_id, name, description, decay_days, target_frequency_days, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [s.id, s.item_id, s.name, s.description, s.decay_days, s.target_frequency_days, s.created_at, s.updated_at]
+        'INSERT INTO skills (id, item_id, name, description, decay_days, target_frequency_days, created_at, updated_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [s.id, s.item_id, s.name, s.description, s.decay_days, s.target_frequency_days, s.created_at, s.updated_at, 'local-dev-user']
       );
     }
     for (const se of data.sessions) {
       db.run(
-        'INSERT INTO sessions (id, skill_id, practiced_at, duration_minutes, rating, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [se.id, se.skill_id, se.practiced_at, se.duration_minutes, se.rating, se.notes, se.created_at]
+        'INSERT INTO sessions (id, skill_id, practiced_at, duration_minutes, rating, notes, created_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [se.id, se.skill_id, se.practiced_at, se.duration_minutes, se.rating, se.notes, se.created_at, 'local-dev-user']
       );
     }
 
