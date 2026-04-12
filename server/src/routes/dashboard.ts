@@ -20,7 +20,7 @@ router.get('/summary', (req, res) => {
     SELECT
       c.id as category_id, c.name as category_name, c.icon as category_icon,
       c.decay_days as category_decay_days,
-      i.id as item_id, i.name as item_name,
+      i.id as item_id, i.name as item_name, i.icon as item_icon,
       s.id as skill_id, s.name as skill_name, s.decay_days as skill_decay_days,
       MAX(se.practiced_at) as last_practiced,
       COUNT(se.id) as total_sessions,
@@ -51,7 +51,7 @@ router.get('/summary', (req, res) => {
 
     let item = cat.items.find(i => i.id === row.item_id);
     if (!item) {
-      item = { id: row.item_id, name: row.item_name, skills: [] };
+      item = { id: row.item_id, name: row.item_name, icon: row.item_icon, skills: [] };
       cat.items.push(item);
     }
 
@@ -113,6 +113,7 @@ router.get('/summary', (req, res) => {
 router.get('/stats/frequency', (req, res) => {
   const { skillId, period = '30' } = req.query;
   const days = Math.min(parseInt(period as string) || 30, 365);
+  const today = (req.query.today as string) || new Date().toISOString().slice(0, 10);
 
   let data: FrequencyData[];
 
@@ -120,17 +121,17 @@ router.get('/stats/frequency', (req, res) => {
     data = queryAll(
       `SELECT date(practiced_at) as date, COUNT(*) as count
        FROM sessions
-       WHERE skill_id = ? AND practiced_at >= date('now', '-' || ? || ' days')
+       WHERE skill_id = ? AND practiced_at >= date(?, '-' || ? || ' days')
        GROUP BY date(practiced_at) ORDER BY date`,
-      [Number(skillId), days]
+      [Number(skillId), today, days]
     );
   } else {
     data = queryAll(
       `SELECT date(practiced_at) as date, COUNT(*) as count
        FROM sessions
-       WHERE practiced_at >= date('now', '-' || ? || ' days')
+       WHERE practiced_at >= date(?, '-' || ? || ' days')
        GROUP BY date(practiced_at) ORDER BY date`,
-      [days]
+      [today, days]
     );
   }
 

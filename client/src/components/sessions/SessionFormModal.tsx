@@ -13,7 +13,10 @@ interface Props {
 export default function SessionFormModal({ skillId: initialSkillId, onClose }: Props) {
   const queryClient = useQueryClient()
   const [selectedSkillId, setSelectedSkillId] = useState<number | ''>(initialSkillId ?? '')
-  const [practicedAt, setPracticedAt] = useState(() => new Date().toISOString().split('T')[0])
+  const [practicedAt, setPracticedAt] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  })
   const [duration, setDuration] = useState('')
   const [rating, setRating] = useState<number>(0)
   const [notes, setNotes] = useState('')

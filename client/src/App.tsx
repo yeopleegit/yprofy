@@ -61,7 +61,7 @@ function AppLayout() {
     <>
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">YProficiency</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">YProfy</h1>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">기량 유지 트래커</p>
         </div>
         <div className="flex items-center gap-1">
@@ -163,7 +163,7 @@ function AppLayout() {
         <button onClick={() => setSidebarOpen(true)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
           <Menu size={24} className="text-gray-600 dark:text-gray-300" />
         </button>
-        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">YProficiency</h1>
+        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">YProfy</h1>
         <div className="flex items-center gap-1">
           <button
             onClick={toggleDark}

@@ -115,6 +115,7 @@ export interface SkillSummary {
 export interface ItemSummary {
   id: number;
   name: string;
+  icon: string | null;
   skills: SkillSummary[];
 }
 

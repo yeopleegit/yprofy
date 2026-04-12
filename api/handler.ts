@@ -275,7 +275,7 @@ addRoute('GET', 'dashboard/summary', async (req, res, _params, supabase) => {
     const cat = categoryMap.get(row.category_id)!;
     if (row.item_id === null) continue;
     let item = cat.items.find(i => i.id === row.item_id);
-    if (!item) { item = { id: row.item_id, name: row.item_name, skills: [] }; cat.items.push(item); }
+    if (!item) { item = { id: row.item_id, name: row.item_name, icon: row.item_icon, skills: [] }; cat.items.push(item); }
     if (row.skill_id === null) continue;
     const effectiveDecay = row.skill_decay_days ?? row.category_decay_days;
     item.skills.push({
@@ -302,7 +302,12 @@ addRoute('GET', 'dashboard/summary', async (req, res, _params, supabase) => {
 addRoute('GET', 'dashboard/stats/frequency', async (req, res, _params, supabase) => {
   const { skillId, period = '30' } = req.query;
   const days = Math.min(parseInt(period as string) || 30, 365);
-  const { data, error } = await supabase.rpc('session_frequency', { p_skill_id: skillId ? Number(skillId) : null, p_days: days });
+  const today = (req.query.today as string) || new Date().toISOString().slice(0, 10);
+  const { data, error } = await supabase.rpc('session_frequency', {
+    p_skill_id: skillId ? Number(skillId) : null,
+    p_days: days,
+    p_today: today,
+  });
   if (error) return res.status(500).json({ error: error.message });
   return res.json(data);
 });

@@ -2,6 +2,11 @@ import { supabase } from '../lib/supabase';
 
 const BASE = '/api/v1';
 
+function localToday(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const { data: { session } } = await supabase.auth.getSession();
   const headers: Record<string, string> = {
@@ -54,14 +59,13 @@ export const api = {
 
   // Dashboard
   getDashboard: () => {
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    return request<any>(`/dashboard/summary?today=${today}`);
+    return request<any>(`/dashboard/summary?today=${localToday()}`);
   },
   getFrequency: (params?: { skillId?: number; period?: number }) => {
     const qs = new URLSearchParams();
     if (params?.skillId) qs.set('skillId', String(params.skillId));
     if (params?.period) qs.set('period', String(params.period));
+    qs.set('today', localToday());
     return request<any[]>(`/dashboard/stats/frequency?${qs}`);
   },
 

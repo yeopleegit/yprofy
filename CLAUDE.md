@@ -1,4 +1,4 @@
-# YProficiency
+# YProfy
 
 지속적인 연습이 필요한 기술의 기량 유지 상태를 추적하는 웹 앱.
 
@@ -12,7 +12,7 @@
 ## Project Structure
 
 ```
-yproficiency/
+yprofy/
 ├── package.json          # npm workspaces root
 ├── api/                  # Vercel serverless (배포용)
 │   └── handler.ts        # 단일 catch-all API handler (모든 /api/v1/* 라우트)
@@ -135,6 +135,6 @@ DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 - 반응형 디자인: lg(1024px) 기준, 모바일에서 햄버거 메뉴 + 슬라이드 사이드바
 - 삭제 작업은 ConfirmDialog로 확인 후 실행
 - Item/Skill 복사: "Copy of {이름}"으로 생성, 세션 미복사 (Stale 초기화)
-- GitHub repo: https://github.com/yeopleegit/yproficiency
+- GitHub repo: https://github.com/yeopleegit/yprofy
 - 배포 URL: https://yprofy.vercel.app
 - Vercel rewrite로 `/api/v1/*` → `/api/handler?__path=*` 라우팅 (Hobby 플랜 12개 함수 제한 회피)

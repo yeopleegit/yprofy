@@ -185,7 +185,7 @@ export default function CategoryPage({ onLogSession }: Props) {
                 >
                   <div className="flex items-center gap-2">
                     {expanded ? <ChevronDown size={16} className="text-gray-500 dark:text-gray-400" /> : <ChevronRight size={16} className="text-gray-500 dark:text-gray-400" />}
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100">{item.name}</h3>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100">{item.icon ? `${item.icon} ` : ''}{item.name}</h3>
                     <span className="text-xs text-gray-400 dark:text-gray-500">
                       {item.skills?.length ?? 0}개 스킬
                     </span>

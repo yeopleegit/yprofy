@@ -1,5 +1,5 @@
 -- ============================================
--- YProficiency - Supabase PostgreSQL Schema
+-- YProfy - Supabase PostgreSQL Schema
 -- Supabase SQL Editor에서 실행하세요
 -- ============================================
 
@@ -88,6 +88,7 @@ RETURNS TABLE (
     category_decay_days INTEGER,
     item_id INTEGER,
     item_name TEXT,
+    item_icon TEXT,
     skill_id INTEGER,
     skill_name TEXT,
     skill_decay_days INTEGER,
@@ -101,7 +102,7 @@ BEGIN
     SELECT
         c.id, c.name, c.icon,
         c.decay_days,
-        i.id, i.name,
+        i.id, i.name, i.icon,
         s.id, s.name, s.decay_days,
         MAX(se.practiced_at),
         COUNT(se.id),
@@ -112,7 +113,7 @@ BEGIN
     LEFT JOIN skills s ON s.item_id = i.id
     LEFT JOIN sessions se ON se.skill_id = s.id
     WHERE c.user_id = auth.uid()
-    GROUP BY c.id, c.name, c.icon, c.decay_days, i.id, i.name, s.id, s.name, s.decay_days
+    GROUP BY c.id, c.name, c.icon, c.decay_days, i.id, i.name, i.icon, s.id, s.name, s.decay_days
     ORDER BY c.name, i.name, s.name;
 END;
 $$ LANGUAGE plpgsql;
@@ -163,11 +164,17 @@ $$ LANGUAGE plpgsql;
 
 -- 7. 연습 빈도 함수
 
-CREATE OR REPLACE FUNCTION session_frequency(p_skill_id INTEGER DEFAULT NULL, p_days INTEGER DEFAULT 30)
+CREATE OR REPLACE FUNCTION session_frequency(
+    p_skill_id INTEGER DEFAULT NULL,
+    p_days INTEGER DEFAULT 30,
+    p_today TEXT DEFAULT NULL
+)
 RETURNS TABLE (
     date TEXT,
     count BIGINT
 ) AS $$
+DECLARE
+    anchor DATE := COALESCE(p_today::DATE, CURRENT_DATE);
 BEGIN
     IF p_skill_id IS NOT NULL THEN
         RETURN QUERY
@@ -175,7 +182,7 @@ BEGIN
         FROM sessions se
         WHERE se.skill_id = p_skill_id
           AND se.user_id = auth.uid()
-          AND se.practiced_at >= (CURRENT_DATE - (p_days || ' days')::INTERVAL)::TEXT
+          AND se.practiced_at >= (anchor - (p_days || ' days')::INTERVAL)::TEXT
         GROUP BY se.practiced_at::DATE
         ORDER BY se.practiced_at::DATE;
     ELSE
@@ -183,7 +190,7 @@ BEGIN
         SELECT se.practiced_at::DATE::TEXT, COUNT(*)
         FROM sessions se
         WHERE se.user_id = auth.uid()
-          AND se.practiced_at >= (CURRENT_DATE - (p_days || ' days')::INTERVAL)::TEXT
+          AND se.practiced_at >= (anchor - (p_days || ' days')::INTERVAL)::TEXT
         GROUP BY se.practiced_at::DATE
         ORDER BY se.practiced_at::DATE;
     END IF;

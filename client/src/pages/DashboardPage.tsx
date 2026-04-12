@@ -152,7 +152,7 @@ export default function DashboardPage({ onLogSession }: Props) {
                 <div className="divide-y divide-gray-100 dark:divide-gray-700">
                   {cat.items.map((item: any) => (
                     <div key={item.id} className="p-4">
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{item.name}</h4>
+                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{item.icon ? `${item.icon} ` : ''}{item.name}</h4>
                       <div className="flex flex-wrap gap-2">
                         {item.skills.map((skill: any) => (
                           <button

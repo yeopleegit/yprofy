@@ -81,7 +81,9 @@ export default function SettingsPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `yproficiency-backup-${new Date().toISOString().split('T')[0]}.json`
+      const now = new Date()
+      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+      a.download = `yprofy-backup-${dateStr}.json`
       a.click()
       URL.revokeObjectURL(url)
       toast.success('데이터를 내보냈습니다')
