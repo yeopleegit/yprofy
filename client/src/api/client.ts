@@ -43,6 +43,7 @@ export const api = {
   updateItem: (id: number, data: any) => request<any>(`/items/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   copyItem: (id: number) => request<any>(`/items/${id}/copy`, { method: 'POST' }),
   deleteItem: (id: number) => request<void>(`/items/${id}`, { method: 'DELETE' }),
+  getItemSessions: (id: number) => request<any[]>(`/items/${id}/sessions`),
 
   // Skills
   getSkills: (itemId: number) => request<any[]>(`/items/${itemId}/skills`),

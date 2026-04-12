@@ -31,6 +31,15 @@ export async function initDb(): Promise<Database> {
   const schema = fs.readFileSync(SCHEMA_PATH, 'utf-8');
   db.run(schema);
 
+  // Migration: add user_id column to pre-existing tables if missing
+  for (const table of ['categories', 'items', 'skills', 'sessions']) {
+    const info = db.exec(`PRAGMA table_info(${table})`);
+    const columns = info[0]?.values.map((row: any) => row[1]) ?? [];
+    if (!columns.includes('user_id')) {
+      db.run(`ALTER TABLE ${table} ADD COLUMN user_id TEXT NOT NULL DEFAULT 'local-dev-user'`);
+    }
+  }
+
   saveDb();
   return db;
 }

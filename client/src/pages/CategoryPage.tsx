@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Plus, Trash2, ChevronDown, ChevronRight, Pencil, Copy } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronRight, Pencil, Copy, ScrollText, Star } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../api/client'
 import StatusBadge from '../components/shared/StatusBadge'
@@ -37,6 +37,7 @@ export default function CategoryPage({ onLogSession }: Props) {
   const [deleteSkillTarget, setDeleteSkillTarget] = useState<{ id: number; name: string } | null>(null)
   const [editItem, setEditItem] = useState<EditItemData | null>(null)
   const [editSkill, setEditSkill] = useState<EditSkillData | null>(null)
+  const [logsItem, setLogsItem] = useState<{ id: number; name: string; icon?: string } | null>(null)
 
   const { data: category, isLoading } = useQuery({
     queryKey: ['category', id],
@@ -47,6 +48,12 @@ export default function CategoryPage({ onLogSession }: Props) {
   const { data: dashboard } = useQuery({
     queryKey: ['dashboard'],
     queryFn: api.getDashboard,
+  })
+
+  const { data: itemSessions, isLoading: sessionsLoading } = useQuery({
+    queryKey: ['item-sessions', logsItem?.id],
+    queryFn: () => api.getItemSessions(logsItem!.id),
+    enabled: !!logsItem,
   })
 
   const invalidateAll = () => {
@@ -191,6 +198,13 @@ export default function CategoryPage({ onLogSession }: Props) {
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
+                    <button
+                      onClick={e => { e.stopPropagation(); setLogsItem({ id: item.id, name: item.name, icon: item.icon }) }}
+                      className="p-1 rounded hover:bg-purple-50 dark:hover:bg-purple-900/30 text-gray-400 hover:text-purple-500"
+                      title="연습 로그 보기"
+                    >
+                      <ScrollText size={14} />
+                    </button>
                     <button
                       onClick={e => { e.stopPropagation(); copyItemMutation.mutate(item.id) }}
                       className="p-1 rounded hover:bg-green-50 dark:hover:bg-green-900/30 text-gray-400 hover:text-green-500"
@@ -449,6 +463,71 @@ export default function CategoryPage({ onLogSession }: Props) {
           </form>
         </Modal>
       )}
+
+      {/* Item Sessions Log Modal */}
+      {logsItem && (
+        <Modal title={`${logsItem.icon ? `${logsItem.icon} ` : ''}${logsItem.name} · 연습 로그`} onClose={() => setLogsItem(null)}>
+          {sessionsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+            </div>
+          ) : !itemSessions || itemSessions.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
+              아직 연습 기록이 없습니다
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              <p className="text-xs text-gray-400 dark:text-gray-500">총 {itemSessions.length}건</p>
+              {itemSessions.map((s: any) => (
+                <div
+                  key={s.id}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/40"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {s.skill_name ?? '(삭제된 스킬)'}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                      {formatPracticedAt(s.practiced_at)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-600 dark:text-gray-400">
+                    {s.duration_minutes != null && <span>{s.duration_minutes}분</span>}
+                    {s.rating != null && (
+                      <span className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            size={12}
+                            className={i < s.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}
+                          />
+                        ))}
+                      </span>
+                    )}
+                  </div>
+                  {s.notes && (
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 whitespace-pre-wrap">{s.notes}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </Modal>
+      )}
     </div>
   )
+}
+
+function formatPracticedAt(value: string): string {
+  if (!value) return ''
+  const hasTime = value.includes('T')
+  const d = new Date(hasTime ? value : `${value}T00:00:00`)
+  if (isNaN(d.getTime())) return value
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  if (!hasTime) return `${y}-${m}-${day}`
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${y}-${m}-${day} ${hh}:${mm}`
 }

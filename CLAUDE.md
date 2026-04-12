@@ -68,6 +68,7 @@ CASCADE 삭제 적용. 카테고리 삭제 시 하위 데이터 전부 삭제됨
 
 - `GET/POST /categories`, `GET/PUT/DELETE /categories/:id`
 - `GET/POST /categories/:catId/items`, `GET/PUT/DELETE /items/:id`, `POST /items/:id/copy`
+- `GET /items/:id/sessions` — 아이템 하위 모든 스킬의 세션 로그 (skill_name 포함, practiced_at 역순)
 - `GET/POST /items/:itemId/skills`, `PUT/DELETE /skills/:id`, `POST /skills/:id/copy`
 - `GET/POST /skills/:skillId/sessions`, `PUT/DELETE /sessions/:id`
 - `GET /dashboard/summary?today=YYYY-MM-DD` — 전체 decay 상태 포함 대시보드 (today: 클라이언트 로컬타임 기준 날짜)
@@ -87,6 +88,7 @@ CASCADE 삭제 적용. 카테고리 삭제 시 하위 데이터 전부 삭제됨
 sql.js 사용 (better-sqlite3는 Windows에서 node-gyp/Python 필요하여 사용 불가).
 DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 `server/src/db/helpers.ts`에 queryAll, queryOne, execute, insert 헬퍼 함수 제공.
+`initDb()`는 `CREATE TABLE IF NOT EXISTS` + 누락 컬럼(`user_id`) 자동 `ALTER TABLE` 마이그레이션을 수행하여 기존 DB 파일도 호환.
 
 ### 배포 (Supabase PostgreSQL)
 - `supabase/schema.sql`: 테이블, 인덱스, RLS 정책, RPC 함수 (dashboard_summary, dashboard_stats, most_stale_skill, session_frequency)
@@ -129,6 +131,7 @@ DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 ## Notes
 
 - Vite dev server가 `/api` 요청을 localhost:3001로 프록시함
+- `client/vite.config.ts`에 `envDir: '..'` 설정 — 레포 루트의 `.env.local`에서 `VITE_*` 환경변수 로드
 - Tailwind v4 사용 — `@import "tailwindcss"` 방식 (tailwind.config.js 없음)
 - sql.js는 비동기 초기화 필요 → `initDb()` 후 서버 시작
 - 매 write 작업마다 `saveDb()`로 디스크에 flush

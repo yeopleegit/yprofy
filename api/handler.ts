@@ -133,6 +133,23 @@ addRoute('GET', 'items/:id', async (_req, res, { id }, supabase) => {
   return res.json(item);
 });
 
+addRoute('GET', 'items/:id/sessions', async (_req, res, { id }, supabase) => {
+  const { data: skills, error: skillErr } = await supabase
+    .from('skills').select('id, name').eq('item_id', Number(id));
+  if (skillErr) return res.status(500).json({ error: skillErr.message });
+  if (!skills || skills.length === 0) return res.json([]);
+
+  const skillIds = skills.map(s => s.id);
+  const nameMap = new Map(skills.map(s => [s.id, s.name]));
+
+  const { data: sessions, error } = await supabase
+    .from('sessions').select('*').in('skill_id', skillIds)
+    .order('practiced_at', { ascending: false }).order('id', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+
+  return res.json((sessions ?? []).map(s => ({ ...s, skill_name: nameMap.get(s.skill_id) ?? null })));
+});
+
 addRoute('PUT', 'items/:id', async (req, res, { id }, supabase) => {
   const result = itemSchema.partial().safeParse(req.body);
   if (!result.success) return res.status(400).json({ error: result.error.flatten() });
