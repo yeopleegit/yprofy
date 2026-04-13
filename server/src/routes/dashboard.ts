@@ -19,7 +19,7 @@ router.get('/summary', (req, res) => {
   const rows = queryAll(`
     SELECT
       c.id as category_id, c.name as category_name, c.icon as category_icon,
-      c.decay_days as category_decay_days,
+      c.decay_days as category_decay_days, c.sort_order as category_sort_order,
       i.id as item_id, i.name as item_name, i.icon as item_icon,
       s.id as skill_id, s.name as skill_name, s.decay_days as skill_decay_days,
       MAX(se.practiced_at) as last_practiced,
@@ -31,7 +31,7 @@ router.get('/summary', (req, res) => {
     LEFT JOIN skills s ON s.item_id = i.id
     LEFT JOIN sessions se ON se.skill_id = s.id
     GROUP BY c.id, i.id, s.id
-    ORDER BY c.name, i.name, s.name
+    ORDER BY c.sort_order, c.name, i.name, s.name
   `, [today]);
 
   const categoryMap = new Map<number, DashboardCategory>();

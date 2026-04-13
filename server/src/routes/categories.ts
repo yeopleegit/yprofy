@@ -15,8 +15,23 @@ const updateSchema = createSchema.partial();
 
 // GET /api/v1/categories
 router.get('/', (_req, res) => {
-  const categories = queryAll('SELECT * FROM categories ORDER BY name');
+  const categories = queryAll('SELECT * FROM categories ORDER BY sort_order, name');
   res.json(categories);
+});
+
+// PUT /api/v1/categories/reorder  (must be declared before /:id)
+const reorderSchema = z.object({ ids: z.array(z.number().int()).min(1) });
+router.put('/reorder', (req, res) => {
+  const result = reorderSchema.safeParse(req.body);
+  if (!result.success) return res.status(400).json({ error: result.error.flatten() });
+
+  result.data.ids.forEach((id, idx) => {
+    execute(
+      `UPDATE categories SET sort_order = ?, updated_at = datetime('now') WHERE id = ?`,
+      [idx, id]
+    );
+  });
+  res.status(204).end();
 });
 
 // GET /api/v1/categories/:id
@@ -39,9 +54,11 @@ router.post('/', (req, res) => {
   if (!result.success) return res.status(400).json({ error: result.error.flatten() });
 
   const { name, description, icon, decay_days } = result.data;
+  const maxRow = queryOne('SELECT COALESCE(MAX(sort_order), -1) + 1 AS next FROM categories');
+  const nextOrder = maxRow?.next ?? 0;
   const id = insert(
-    'INSERT INTO categories (name, description, icon, decay_days, user_id) VALUES (?, ?, ?, ?, ?)',
-    [name, description ?? null, icon ?? null, decay_days ?? 14, 'local-dev-user']
+    'INSERT INTO categories (name, description, icon, decay_days, sort_order, user_id) VALUES (?, ?, ?, ?, ?, ?)',
+    [name, description ?? null, icon ?? null, decay_days ?? 14, nextOrder, 'local-dev-user']
   );
   const category = queryOne('SELECT * FROM categories WHERE id = ?', [id]);
   res.status(201).json(category);

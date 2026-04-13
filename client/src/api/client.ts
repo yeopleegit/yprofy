@@ -35,6 +35,7 @@ export const api = {
   createCategory: (data: any) => request<any>('/categories', { method: 'POST', body: JSON.stringify(data) }),
   updateCategory: (id: number, data: any) => request<any>(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteCategory: (id: number) => request<void>(`/categories/${id}`, { method: 'DELETE' }),
+  reorderCategories: (ids: number[]) => request<void>('/categories/reorder', { method: 'PUT', body: JSON.stringify({ ids }) }),
 
   // Items
   getItems: (catId: number) => request<any[]>(`/categories/${catId}/items`),

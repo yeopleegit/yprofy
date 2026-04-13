@@ -12,6 +12,7 @@ CREATE TABLE categories (
     description TEXT,
     icon        TEXT,
     decay_days  INTEGER NOT NULL DEFAULT 14,
+    sort_order  INTEGER NOT NULL DEFAULT 0,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -113,8 +114,8 @@ BEGIN
     LEFT JOIN skills s ON s.item_id = i.id
     LEFT JOIN sessions se ON se.skill_id = s.id
     WHERE c.user_id = auth.uid()
-    GROUP BY c.id, c.name, c.icon, c.decay_days, i.id, i.name, i.icon, s.id, s.name, s.decay_days
-    ORDER BY c.name, i.name, s.name;
+    GROUP BY c.id, c.name, c.icon, c.decay_days, c.sort_order, i.id, i.name, i.icon, s.id, s.name, s.decay_days
+    ORDER BY c.sort_order, c.name, i.name, s.name;
 END;
 $$ LANGUAGE plpgsql;
 

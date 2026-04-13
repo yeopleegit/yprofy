@@ -55,7 +55,7 @@ vercel --prod            # Vercel 프로덕션 배포
 
 categories → items → skills → sessions (4계층 구조)
 
-- **categories**: 최상위 분류 (예: Flight Simulation). `decay_days`로 기량 감소 기준일 설정.
+- **categories**: 최상위 분류 (예: Flight Simulation). `decay_days`로 기량 감소 기준일 설정. `sort_order`로 사용자 지정 순서 관리 (사이드바 드래그).
 - **items**: 카테고리 내 아이템 (예: F-16C Viper)
 - **skills**: 아이템 내 스킬 (예: Takeoff, Landing, A2A). `decay_days`로 카테고리 기본값 오버라이드 가능.
 - **sessions**: 연습 기록 (날짜, 시간, 평점 1-5, 메모)
@@ -67,6 +67,7 @@ CASCADE 삭제 적용. 카테고리 삭제 시 하위 데이터 전부 삭제됨
 모든 엔드포인트 prefix: `/api/v1`
 
 - `GET/POST /categories`, `GET/PUT/DELETE /categories/:id`
+- `PUT /categories/reorder` — 카테고리 순서 변경 (body: `{ ids: number[] }`, 배열 인덱스가 곧 `sort_order`)
 - `GET/POST /categories/:catId/items`, `GET/PUT/DELETE /items/:id`, `POST /items/:id/copy`
 - `GET /items/:id/sessions` — 아이템 하위 모든 스킬의 세션 로그 (skill_name 포함, practiced_at 역순)
 - `GET/POST /items/:itemId/skills`, `PUT/DELETE /skills/:id`, `POST /skills/:id/copy`
@@ -127,6 +128,16 @@ DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 - 주의/감소 스킬이 없는 아이템·카테고리는 자동 숨김
 - 모든 스킬이 양호하면 "모든 스킬이 양호합니다" 안내 표시
 - 날짜 계산은 클라이언트 로컬타임 기준 (today 쿼리 파라미터로 서버 전달)
+- 카테고리 표시 순서는 `categories.sort_order` 기준 — 사이드바 드래그 결과가 그대로 반영됨
+
+## Category Reordering
+
+- 사이드바에서 카테고리 좌측 `GripVertical` 핸들을 드래그하여 순서 변경
+- HTML5 네이티브 DnD 사용 (라이브러리 무의존). 드래그 타겟 상/하 절반에 따라 `before`/`after` 드롭 위치 판정, 가로 인디케이터 바로 시각화
+- `PUT /api/v1/categories/reorder` 로 새 순서 영속화. react-query 로 optimistic update + `categories`/`dashboard` 쿼리 자동 무효화
+- `dashboard_summary` RPC (Supabase) 와 로컬 dashboard 라우트 모두 `ORDER BY c.sort_order, c.name` 로 정렬
+- 신규 카테고리는 `max(sort_order) + 1` 로 자동 할당 (목록 맨 아래 추가)
+- 기존 DB 마이그레이션: SQLite 는 `initDb()` 에서 `ALTER TABLE` 자동 실행, Supabase 는 `supabase/migrations/004_categories_sort_order.sql` 적용 필요
 
 ## Notes
 

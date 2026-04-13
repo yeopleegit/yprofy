@@ -6,6 +6,7 @@ export interface Category {
   description: string | null;
   icon: string | null;
   decay_days: number;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 }

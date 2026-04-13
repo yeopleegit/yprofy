@@ -40,6 +40,16 @@ export async function initDb(): Promise<Database> {
     }
   }
 
+  // Migration: add sort_order column to categories if missing, backfill with id
+  {
+    const info = db.exec(`PRAGMA table_info(categories)`);
+    const columns = info[0]?.values.map((row: any) => row[1]) ?? [];
+    if (!columns.includes('sort_order')) {
+      db.run(`ALTER TABLE categories ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0`);
+      db.run(`UPDATE categories SET sort_order = id`);
+    }
+  }
+
   saveDb();
   return db;
 }

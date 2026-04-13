@@ -64,7 +64,7 @@ const sessionSchema = z.object({
 // ─── Categories ─────────────────────────────────────────
 
 addRoute('GET', 'categories', async (_req, res, _params, supabase) => {
-  const { data, error } = await supabase.from('categories').select('*').order('name');
+  const { data, error } = await supabase.from('categories').select('*').order('sort_order').order('name');
   if (error) return res.status(500).json({ error: error.message });
   return res.json(data);
 });
@@ -73,12 +73,30 @@ addRoute('POST', 'categories', async (req, res, _params, supabase, userId) => {
   const result = categorySchema.safeParse(req.body);
   if (!result.success) return res.status(400).json({ error: result.error.flatten() });
   const { name, description, icon, decay_days } = result.data;
+  const { data: maxRow } = await supabase
+    .from('categories').select('sort_order')
+    .order('sort_order', { ascending: false }).limit(1).maybeSingle();
+  const nextOrder = (maxRow?.sort_order ?? -1) + 1;
   const { data, error } = await supabase
     .from('categories')
-    .insert({ name, description: description ?? null, icon: icon ?? null, decay_days: decay_days ?? 14, user_id: userId })
+    .insert({ name, description: description ?? null, icon: icon ?? null, decay_days: decay_days ?? 14, sort_order: nextOrder, user_id: userId })
     .select().single();
   if (error) return res.status(500).json({ error: error.message });
   return res.status(201).json(data);
+});
+
+addRoute('PUT', 'categories/reorder', async (req, res, _params, supabase) => {
+  const schema = z.object({ ids: z.array(z.number().int()).min(1) });
+  const result = schema.safeParse(req.body);
+  if (!result.success) return res.status(400).json({ error: result.error.flatten() });
+  const updates = await Promise.all(
+    result.data.ids.map((id, idx) =>
+      supabase.from('categories').update({ sort_order: idx }).eq('id', id)
+    )
+  );
+  const firstErr = updates.find(u => u.error)?.error;
+  if (firstErr) return res.status(500).json({ error: firstErr.message });
+  return res.status(204).end();
 });
 
 addRoute('GET', 'categories/:id', async (_req, res, { id }, supabase) => {
