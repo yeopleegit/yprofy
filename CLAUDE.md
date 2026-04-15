@@ -129,6 +129,7 @@ DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 - 모든 스킬이 양호하면 "모든 스킬이 양호합니다" 안내 표시
 - 날짜 계산은 클라이언트 로컬타임 기준 (today 쿼리 파라미터로 서버 전달)
 - 카테고리 표시 순서는 `categories.sort_order` 기준 — 사이드바 드래그 결과가 그대로 반영됨
+- 카테고리 카드 헤더 오른쪽 끝의 on/off 토글 스위치로 하위 item/skill 영역 접기/펼치기 가능. 숨긴 카테고리 ID는 `localStorage['dashboard_hidden_category_ids']` (숫자 배열) 에 기기별로 저장 (DB 저장 X)
 
 ## Category Reordering
 

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
 import { Activity, Target, Calendar, AlertTriangle, Plus } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { api } from '../api/client'
@@ -8,7 +9,35 @@ interface Props {
   onLogSession: (skillId?: number) => void
 }
 
+const HIDDEN_CATEGORIES_KEY = 'dashboard_hidden_category_ids'
+
+function loadHiddenIds(): Set<number> {
+  try {
+    const raw = localStorage.getItem(HIDDEN_CATEGORIES_KEY)
+    if (!raw) return new Set()
+    const arr = JSON.parse(raw)
+    return new Set(Array.isArray(arr) ? arr.filter((v) => typeof v === 'number') : [])
+  } catch {
+    return new Set()
+  }
+}
+
 export default function DashboardPage({ onLogSession }: Props) {
+  const [hiddenIds, setHiddenIds] = useState<Set<number>>(() => loadHiddenIds())
+
+  useEffect(() => {
+    localStorage.setItem(HIDDEN_CATEGORIES_KEY, JSON.stringify(Array.from(hiddenIds)))
+  }, [hiddenIds])
+
+  const toggleCategory = (id: number) => {
+    setHiddenIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: api.getDashboard,
@@ -142,13 +171,32 @@ export default function DashboardPage({ onLogSession }: Props) {
 
         return (
           <div className="space-y-4">
-            {filtered.map((cat: any) => (
+            {filtered.map((cat: any) => {
+              const isHidden = hiddenIds.has(cat.id)
+              return (
               <div key={cat.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                <div className={`px-4 py-3 bg-gray-50 dark:bg-gray-700/50 flex items-center justify-between ${isHidden ? '' : 'border-b border-gray-200 dark:border-gray-700'}`}>
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                     {cat.icon} {cat.name}
                   </h3>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={!isHidden}
+                    aria-label={`${cat.name} 카테고리 ${isHidden ? '펼치기' : '접기'}`}
+                    onClick={() => toggleCategory(cat.id)}
+                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                      isHidden ? 'bg-gray-300 dark:bg-gray-600' : 'bg-blue-600'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                        isHidden ? 'translate-x-0.5' : 'translate-x-[18px]'
+                      }`}
+                    />
+                  </button>
                 </div>
+                {!isHidden && (
                 <div className="divide-y divide-gray-100 dark:divide-gray-700">
                   {cat.items.map((item: any) => (
                     <div key={item.id} className="p-4">
@@ -172,8 +220,10 @@ export default function DashboardPage({ onLogSession }: Props) {
                     </div>
                   ))}
                 </div>
+                )}
               </div>
-            ))}
+              )
+            })}
           </div>
         );
       })()}
