@@ -122,6 +122,40 @@ addRoute('DELETE', 'categories/:id', async (_req, res, { id }, supabase) => {
   return res.status(204).end();
 });
 
+addRoute('GET', 'categories/:id/sessions', async (_req, res, { id }, supabase) => {
+  const { data: items, error: itemErr } = await supabase
+    .from('items').select('id, name, icon').eq('category_id', Number(id));
+  if (itemErr) return res.status(500).json({ error: itemErr.message });
+  if (!items || items.length === 0) return res.json([]);
+
+  const itemIds = items.map(i => i.id);
+  const itemMap = new Map(items.map(i => [i.id, { name: i.name, icon: i.icon }]));
+
+  const { data: skills, error: skillErr } = await supabase
+    .from('skills').select('id, name, item_id').in('item_id', itemIds);
+  if (skillErr) return res.status(500).json({ error: skillErr.message });
+  if (!skills || skills.length === 0) return res.json([]);
+
+  const skillIds = skills.map(s => s.id);
+  const skillMap = new Map(skills.map(s => [s.id, { name: s.name, item_id: s.item_id }]));
+
+  const { data: sessions, error } = await supabase
+    .from('sessions').select('*').in('skill_id', skillIds)
+    .order('practiced_at', { ascending: false }).order('id', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+
+  return res.json((sessions ?? []).map(s => {
+    const sk = skillMap.get(s.skill_id);
+    const it = sk ? itemMap.get(sk.item_id) : null;
+    return {
+      ...s,
+      skill_name: sk?.name ?? null,
+      item_name: it?.name ?? null,
+      item_icon: it?.icon ?? null,
+    };
+  }));
+});
+
 // ─── Items ──────────────────────────────────────────────
 
 addRoute('GET', 'categories/:catId/items', async (_req, res, { catId }, supabase) => {

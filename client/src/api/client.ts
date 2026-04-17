@@ -36,6 +36,7 @@ export const api = {
   updateCategory: (id: number, data: any) => request<any>(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteCategory: (id: number) => request<void>(`/categories/${id}`, { method: 'DELETE' }),
   reorderCategories: (ids: number[]) => request<void>('/categories/reorder', { method: 'PUT', body: JSON.stringify({ ids }) }),
+  getCategorySessions: (id: number) => request<any[]>(`/categories/${id}/sessions`),
 
   // Items
   getItems: (catId: number) => request<any[]>(`/categories/${catId}/items`),

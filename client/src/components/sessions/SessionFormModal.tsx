@@ -17,7 +17,12 @@ export default function SessionFormModal({ skillId: initialSkillId, onClose }: P
   const [selectedSkillId, setSelectedSkillId] = useState<number | ''>(initialSkillId ?? '')
   const [practicedAt, setPracticedAt] = useState(() => {
     const now = new Date()
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const y = now.getFullYear()
+    const m = String(now.getMonth() + 1).padStart(2, '0')
+    const d = String(now.getDate()).padStart(2, '0')
+    const hh = String(now.getHours()).padStart(2, '0')
+    const mi = String(now.getMinutes()).padStart(2, '0')
+    return `${y}-${m}-${d}T${hh}:${mi}`
   })
   const [duration, setDuration] = useState('')
   const [rating, setRating] = useState<number>(0)
@@ -149,10 +154,10 @@ export default function SessionFormModal({ skillId: initialSkillId, onClose }: P
           </select>
         </div>
 
-        {/* Date */}
+        {/* Date & time */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">날짜</label>
-          <input type="date" value={practicedAt} onChange={e => setPracticedAt(e.target.value)} className={inputClass} required />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">연습 일시</label>
+          <input type="datetime-local" value={practicedAt} onChange={e => setPracticedAt(e.target.value)} className={inputClass} required />
         </div>
 
         {/* Duration */}

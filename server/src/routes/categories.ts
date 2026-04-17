@@ -48,6 +48,23 @@ router.get('/:id', (req, res) => {
   res.json({ ...category, items: itemsWithSkills });
 });
 
+// GET /api/v1/categories/:id/sessions — 카테고리 하위 모든 아이템/스킬의 세션 로그
+router.get('/:id/sessions', (req, res) => {
+  const category = queryOne('SELECT id FROM categories WHERE id = ?', [Number(req.params.id)]);
+  if (!category) return res.status(404).json({ error: 'Category not found' });
+
+  const sessions = queryAll(
+    `SELECT s.*, sk.name AS skill_name, it.name AS item_name, it.icon AS item_icon
+       FROM sessions s
+       JOIN skills sk ON sk.id = s.skill_id
+       JOIN items  it ON it.id = sk.item_id
+      WHERE it.category_id = ?
+      ORDER BY s.practiced_at DESC, s.id DESC`,
+    [Number(req.params.id)]
+  );
+  res.json(sessions);
+});
+
 // POST /api/v1/categories
 router.post('/', (req, res) => {
   const result = createSchema.safeParse(req.body);

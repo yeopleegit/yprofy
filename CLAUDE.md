@@ -68,6 +68,7 @@ CASCADE 삭제 적용. 카테고리 삭제 시 하위 데이터 전부 삭제됨
 
 - `GET/POST /categories`, `GET/PUT/DELETE /categories/:id`
 - `PUT /categories/reorder` — 카테고리 순서 변경 (body: `{ ids: number[] }`, 배열 인덱스가 곧 `sort_order`)
+- `GET /categories/:id/sessions` — 카테고리 하위 모든 아이템/스킬의 세션 로그 (skill_name + item_name + item_icon 포함, practiced_at 역순)
 - `GET/POST /categories/:catId/items`, `GET/PUT/DELETE /items/:id`, `POST /items/:id/copy`
 - `GET /items/:id/sessions` — 아이템 하위 모든 스킬의 세션 로그 (skill_name 포함, practiced_at 역순)
 - `GET/POST /items/:itemId/skills`, `PUT/DELETE /skills/:id`, `POST /skills/:id/copy`
@@ -131,7 +132,8 @@ DB 파일: `server/data/proficiency.db` (gitignored). 삭제하면 리셋.
 - 카테고리 표시 순서는 `categories.sort_order` 기준 — 사이드바 드래그 결과가 그대로 반영됨
 - 카테고리 카드 헤더 오른쪽 끝의 on/off 토글 스위치로 하위 item/skill 영역 접기/펼치기 가능. 숨긴 카테고리 ID는 `localStorage['dashboard_hidden_category_ids']` (숫자 배열) 에 기기별로 저장 (DB 저장 X)
 - 연습 빈도 차트는 카테고리별 누적 막대(`<Bar stackId="a">`) + `<Legend />`. 색은 `CATEGORY_PALETTE` 10색을 카테고리 순서대로 매핑. 데이터는 `{date, count, category_id, category_name}` 행을 클라이언트에서 wide 포맷으로 피벗 (`cat_<id>` 키)
-- 연습 기록 폼(`SessionFormModal`)은 카테고리 → 아이템 → 스킬 3단계 종속 드롭다운. 상위 변경 시 하위 자동 초기화. `skillId` prop 으로 열리면 `useEffect` 로 카테고리/아이템도 자동 매칭
+- 빈도 차트 기간은 7/30/90일 토글 버튼으로 선택. 선택값은 `localStorage['dashboard_frequency_period']` 에 저장 (기기별, 기본 30)
+- 연습 기록 폼(`SessionFormModal`)은 카테고리 → 아이템 → 스킬 3단계 종속 드롭다운. 상위 변경 시 하위 자동 초기화. `skillId` prop 으로 열리면 `useEffect` 로 카테고리/아이템도 자동 매칭. 날짜 입력은 `datetime-local` 이라 `YYYY-MM-DDTHH:MM` 로 분 단위까지 저장됨 (서버 zod 스키마가 시간 옵션 허용)
 
 ## Category Reordering
 

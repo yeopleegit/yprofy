@@ -10,6 +10,14 @@ interface Props {
 }
 
 const HIDDEN_CATEGORIES_KEY = 'dashboard_hidden_category_ids'
+const FREQUENCY_PERIOD_KEY = 'dashboard_frequency_period'
+const FREQUENCY_PERIODS = [7, 30, 90] as const
+type FrequencyPeriod = (typeof FREQUENCY_PERIODS)[number]
+
+function loadPeriod(): FrequencyPeriod {
+  const raw = Number(localStorage.getItem(FREQUENCY_PERIOD_KEY))
+  return (FREQUENCY_PERIODS as readonly number[]).includes(raw) ? (raw as FrequencyPeriod) : 30
+}
 
 const CATEGORY_PALETTE = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -29,10 +37,15 @@ function loadHiddenIds(): Set<number> {
 
 export default function DashboardPage({ onLogSession }: Props) {
   const [hiddenIds, setHiddenIds] = useState<Set<number>>(() => loadHiddenIds())
+  const [period, setPeriod] = useState<FrequencyPeriod>(() => loadPeriod())
 
   useEffect(() => {
     localStorage.setItem(HIDDEN_CATEGORIES_KEY, JSON.stringify(Array.from(hiddenIds)))
   }, [hiddenIds])
+
+  useEffect(() => {
+    localStorage.setItem(FREQUENCY_PERIOD_KEY, String(period))
+  }, [period])
 
   const toggleCategory = (id: number) => {
     setHiddenIds((prev) => {
@@ -49,8 +62,8 @@ export default function DashboardPage({ onLogSession }: Props) {
   })
 
   const { data: frequency = [] } = useQuery({
-    queryKey: ['frequency'],
-    queryFn: () => api.getFrequency({ period: 30 }),
+    queryKey: ['frequency', period],
+    queryFn: () => api.getFrequency({ period }),
   })
 
   const stats = data?.stats
@@ -146,7 +159,25 @@ export default function DashboardPage({ onLogSession }: Props) {
       {/* Frequency Chart */}
       {frequencyChartData.length > 0 && (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">연습 빈도 (최근 30일)</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">연습 빈도 (최근 {period}일)</h2>
+            <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-xs">
+              {FREQUENCY_PERIODS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPeriod(p)}
+                  className={`px-2.5 py-1 font-medium transition-colors ${
+                    period === p
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {p}일
+                </button>
+              ))}
+            </div>
+          </div>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={frequencyChartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-200 dark:text-gray-700" />

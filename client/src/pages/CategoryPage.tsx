@@ -38,6 +38,7 @@ export default function CategoryPage({ onLogSession }: Props) {
   const [editItem, setEditItem] = useState<EditItemData | null>(null)
   const [editSkill, setEditSkill] = useState<EditSkillData | null>(null)
   const [logsItem, setLogsItem] = useState<{ id: number; name: string; icon?: string } | null>(null)
+  const [showCategoryLogs, setShowCategoryLogs] = useState(false)
 
   const { data: category, isLoading } = useQuery({
     queryKey: ['category', id],
@@ -54,6 +55,12 @@ export default function CategoryPage({ onLogSession }: Props) {
     queryKey: ['item-sessions', logsItem?.id],
     queryFn: () => api.getItemSessions(logsItem!.id),
     enabled: !!logsItem,
+  })
+
+  const { data: categorySessions, isLoading: categorySessionsLoading } = useQuery({
+    queryKey: ['category-sessions', id],
+    queryFn: () => api.getCategorySessions(Number(id)),
+    enabled: !!id && showCategoryLogs,
   })
 
   const invalidateAll = () => {
@@ -144,9 +151,18 @@ export default function CategoryPage({ onLogSession }: Props) {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          {category.icon} {category.name}
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {category.icon} {category.name}
+          </h1>
+          <button
+            onClick={() => setShowCategoryLogs(true)}
+            className="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            title="연습 로그 보기"
+          >
+            <ScrollText size={16} />
+          </button>
+        </div>
         {category.description && (
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{category.description}</p>
         )}
@@ -484,27 +500,89 @@ export default function CategoryPage({ onLogSession }: Props) {
                   className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/40"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {s.skill_name ?? '(삭제된 스킬)'}
-                    </span>
+                    <div className="flex items-baseline gap-2 min-w-0">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {s.skill_name ?? '(삭제된 스킬)'}
+                      </span>
+                      {s.duration_minutes != null && (
+                        <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          {s.duration_minutes}분
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                       {formatPracticedAt(s.practiced_at)}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-600 dark:text-gray-400">
-                    {s.duration_minutes != null && <span>{s.duration_minutes}분</span>}
-                    {s.rating != null && (
-                      <span className="flex items-center gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            size={12}
-                            className={i < s.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}
-                          />
-                        ))}
+                  {s.rating != null && (
+                    <div className="flex items-center gap-0.5 mt-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={12}
+                          className={i < s.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {s.notes && (
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 whitespace-pre-wrap">{s.notes}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </Modal>
+      )}
+
+      {/* Category Sessions Log Modal */}
+      {showCategoryLogs && category && (
+        <Modal title={`${category.icon ? `${category.icon} ` : ''}${category.name} · 전체 연습 로그`} onClose={() => setShowCategoryLogs(false)}>
+          {categorySessionsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+            </div>
+          ) : !categorySessions || categorySessions.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
+              아직 연습 기록이 없습니다
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              <p className="text-xs text-gray-400 dark:text-gray-500">총 {categorySessions.length}건</p>
+              {categorySessions.map((s: any) => (
+                <div
+                  key={s.id}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/40"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-baseline gap-2 min-w-0">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {s.skill_name ?? '(삭제된 스킬)'}
                       </span>
-                    )}
+                      {s.duration_minutes != null && (
+                        <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          {s.duration_minutes}분
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                      {formatPracticedAt(s.practiced_at)}
+                    </span>
                   </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                    {s.item_icon ? `${s.item_icon} ` : ''}{s.item_name ?? '(삭제된 아이템)'}
+                  </p>
+                  {s.rating != null && (
+                    <div className="flex items-center gap-0.5 mt-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={12}
+                          className={i < s.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}
+                        />
+                      ))}
+                    </div>
+                  )}
                   {s.notes && (
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 whitespace-pre-wrap">{s.notes}</p>
                   )}
