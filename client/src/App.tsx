@@ -95,7 +95,6 @@ function AppLayout() {
     resetDrag()
   }
 
-  // Close sidebar on route change (mobile)
   useEffect(() => {
     setSidebarOpen(false)
   }, [location.pathname])
@@ -115,42 +114,46 @@ function AppLayout() {
 
   const sidebarContent = (
     <>
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+      <div className="px-5 pt-6 pb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">YProfy</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">기량 유지 트래커</p>
+          <h1 className="text-base font-medium tracking-[0.28em] text-carbon dark:text-canvas">
+            YPROFY
+          </h1>
+          <p className="text-xs text-pewter dark:text-silver mt-2 tracking-wide">
+            기량 유지 트래커
+          </p>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={toggleDark}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+            className="p-1.5 rounded-[4px] text-pewter hover:text-carbon dark:text-silver dark:hover:text-canvas"
             title={dark ? '라이트 모드' : '다크 모드'}
           >
-            {dark ? <Sun size={18} /> : <Moon size={18} />}
+            {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="lg:hidden p-1 rounded-[4px] text-pewter hover:text-carbon dark:text-silver dark:hover:text-canvas"
           >
-            <X size={20} className="text-gray-400" />
+            <X size={18} />
           </button>
         </div>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1 overflow-auto">
+      <nav className="flex-1 px-3 pb-4 space-y-0.5 overflow-auto">
         {navItems.map(({ path, icon: Icon, label }) => {
           const active = location.pathname === path
           return (
             <Link
               key={path}
               to={path}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-[4px] text-sm font-medium ${
                 active
-                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                  ? 'bg-ash text-carbon dark:bg-surface-dark-alt dark:text-canvas'
+                  : 'text-graphite hover:bg-ash dark:text-pale dark:hover:bg-surface-dark-alt'
               }`}
             >
-              <Icon size={18} />
+              <Icon size={16} strokeWidth={1.75} />
               {label}
             </Link>
           )
@@ -158,8 +161,8 @@ function AppLayout() {
 
         {categories.length > 0 && (
           <>
-            <div className="pt-4 pb-2 px-3">
-              <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <div className="pt-6 pb-2 px-3">
+              <span className="text-[11px] font-medium text-silver dark:text-pewter tracking-[0.18em] uppercase">
                 카테고리
               </span>
             </div>
@@ -188,16 +191,16 @@ function AppLayout() {
                     e.preventDefault()
                     handleCategoryDrop(cat.id, dropPosition)
                   }}
-                  className={`relative flex items-center gap-1 rounded-lg transition-colors ${
+                  className={`relative flex items-center gap-1 rounded-[4px] ${
                     active
-                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                      ? 'bg-ash text-carbon dark:bg-surface-dark-alt dark:text-canvas'
+                      : 'text-graphite hover:bg-ash dark:text-pale dark:hover:bg-surface-dark-alt'
                   } ${isDragging ? 'opacity-40' : ''}`}
                 >
                   {isDragOver && (
                     <div
-                      className={`pointer-events-none absolute left-1 right-1 h-0.5 rounded-full bg-blue-500 dark:bg-blue-400 ${
-                        dropPosition === 'before' ? '-top-0.5' : '-bottom-0.5'
+                      className={`pointer-events-none absolute left-1 right-1 h-px bg-electric ${
+                        dropPosition === 'before' ? '-top-px' : '-bottom-px'
                       }`}
                     />
                   )}
@@ -212,18 +215,18 @@ function AppLayout() {
                       setDraggedId(null)
                       setDragOverId(null)
                     }}
-                    className="pl-2 pr-1 py-2 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                    className="pl-2 pr-1 py-2 cursor-grab active:cursor-grabbing text-pale hover:text-pewter dark:text-pewter dark:hover:text-pale"
                     title="드래그하여 순서 변경"
                     aria-label="순서 변경 핸들"
                   >
-                    <GripVertical size={14} />
+                    <GripVertical size={14} strokeWidth={1.5} />
                   </span>
                   <Link
                     to={`/categories/${cat.id}`}
                     draggable={false}
                     className="flex-1 flex items-center gap-2 pr-3 py-2 text-sm min-w-0"
                   >
-                    <FolderOpen size={16} />
+                    <FolderOpen size={14} strokeWidth={1.75} />
                     <span className="truncate">{cat.icon} {cat.name}</span>
                   </Link>
                 </div>
@@ -233,28 +236,28 @@ function AppLayout() {
         )}
       </nav>
 
-      <div className="p-3 space-y-2 border-t border-gray-200 dark:border-gray-700">
+      <div className="px-5 pb-5 pt-4 space-y-3 border-t border-cloud dark:border-surface-dark-alt">
         <button
           onClick={() => openSessionModal()}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="w-full flex items-center justify-center gap-2 h-10 px-4 bg-electric text-white rounded-[4px] text-sm font-medium hover:bg-electric-hover"
         >
-          <Plus size={16} />
+          <Plus size={16} strokeWidth={2} />
           연습 기록
         </button>
 
-        <div className="flex items-center gap-2 px-2 py-1.5">
+        <div className="flex items-center gap-2 pt-2">
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className="w-6 h-6 rounded-full" referrerPolicy="no-referrer" />
           ) : (
-            <div className="w-6 h-6 rounded-full bg-gray-300 dark:bg-gray-600" />
+            <div className="w-6 h-6 rounded-full bg-cloud dark:bg-surface-dark-alt" />
           )}
-          <span className="flex-1 text-xs text-gray-600 dark:text-gray-400 truncate">{displayName}</span>
+          <span className="flex-1 text-xs text-pewter dark:text-silver truncate">{displayName}</span>
           <button
             onClick={signOut}
-            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="p-1 rounded-[4px] text-pewter hover:text-carbon dark:text-silver dark:hover:text-canvas"
             title="로그아웃"
           >
-            <LogOut size={14} />
+            <LogOut size={14} strokeWidth={1.75} />
           </button>
         </div>
       </div>
@@ -262,25 +265,25 @@ function AppLayout() {
   )
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-canvas dark:bg-carbon">
       {/* Mobile header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-        <button onClick={() => setSidebarOpen(true)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Menu size={24} className="text-gray-600 dark:text-gray-300" />
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-canvas dark:bg-carbon px-5 h-14 flex items-center justify-between border-b border-cloud dark:border-surface-dark-alt">
+        <button onClick={() => setSidebarOpen(true)} className="p-1 rounded-[4px] text-carbon dark:text-canvas">
+          <Menu size={22} strokeWidth={1.75} />
         </button>
-        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">YProfy</h1>
+        <h1 className="text-sm font-medium tracking-[0.28em] text-carbon dark:text-canvas">YPROFY</h1>
         <div className="flex items-center gap-1">
           <button
             onClick={toggleDark}
-            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+            className="p-1 rounded-[4px] text-pewter dark:text-silver"
           >
-            {dark ? <Sun size={20} /> : <Moon size={20} />}
+            {dark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
           <button
             onClick={() => openSessionModal()}
-            className="p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+            className="p-1 rounded-[4px] text-electric"
           >
-            <Plus size={24} />
+            <Plus size={22} strokeWidth={2} />
           </button>
         </div>
       </div>
@@ -288,7 +291,8 @@ function AppLayout() {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-40 bg-black/40"
+          className="lg:hidden fixed inset-0 z-40"
+          style={{ backgroundColor: 'rgba(128,128,128,0.65)' }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -296,8 +300,9 @@ function AppLayout() {
       {/* Sidebar */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-50
-        w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col
-        transition-transform duration-200
+        w-64 bg-canvas dark:bg-carbon flex flex-col
+        border-r border-cloud dark:border-surface-dark-alt
+        transition-transform duration-300
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {sidebarContent}

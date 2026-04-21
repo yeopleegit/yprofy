@@ -112,83 +112,98 @@ export default function SettingsPage() {
     e.target.value = ''
   }
 
-  const inputClass = 'border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-  const inputClassSm = 'border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+  const labelClass = 'block text-xs font-medium text-pewter dark:text-silver mb-2 tracking-wide'
+  const inputClass = 'w-full h-10 px-3 text-sm bg-canvas dark:bg-surface-dark-alt text-carbon dark:text-canvas border border-pale dark:border-surface-dark-alt rounded-[4px] focus:outline-none focus:border-electric focus:ring-2 focus:ring-electric/20'
+  const inputClassSm = 'w-full h-9 px-2 text-sm bg-canvas dark:bg-surface-dark-alt text-carbon dark:text-canvas border border-pale dark:border-surface-dark-alt rounded-[4px] focus:outline-none focus:border-electric'
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">설정</h1>
-
-      {/* Create Category */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">새 카테고리</h2>
-        <form
-          onSubmit={e => { e.preventDefault(); if (newName.trim()) createMutation.mutate() }}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-        >
-          <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="이름 *" className={inputClass} required />
-          <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="설명" className={inputClass} />
-          <input value={newIcon} onChange={e => setNewIcon(e.target.value)} placeholder="아이콘 (이모지)" className={inputClass} />
-          <div className="flex gap-2">
-            <input type="number" value={newDecay} onChange={e => setNewDecay(e.target.value)} placeholder="감소 기준일" min="1" max="365" className={`flex-1 ${inputClass}`} />
-            <button
-              type="submit"
-              disabled={!newName.trim()}
-              className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-            >
-              <Plus size={16} /> 생성
-            </button>
-          </div>
-        </form>
+    <div className="px-6 lg:px-12 max-w-[1280px] mx-auto">
+      <div className="divide-y divide-cloud dark:divide-surface-dark-alt [&>*]:py-10">
+      <div>
+        <p className="text-xs font-medium text-silver tracking-[0.2em] uppercase mb-3">Preferences</p>
+        <h1 className="text-4xl font-medium text-carbon dark:text-canvas">설정</h1>
       </div>
 
+      {/* Create Category */}
+      <section>
+        <h2 className="text-xs font-medium text-silver tracking-[0.2em] uppercase mb-5">새 카테고리</h2>
+        <form
+          onSubmit={e => { e.preventDefault(); if (newName.trim()) createMutation.mutate() }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        >
+          <div>
+            <label className={labelClass}>이름</label>
+            <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="카테고리 이름" className={inputClass} required />
+          </div>
+          <div>
+            <label className={labelClass}>설명</label>
+            <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="선택 사항" className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>아이콘 (이모지)</label>
+            <input value={newIcon} onChange={e => setNewIcon(e.target.value)} placeholder="예: ✈️" className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>감소 기준일</label>
+            <div className="flex gap-3">
+              <input type="number" value={newDecay} onChange={e => setNewDecay(e.target.value)} placeholder="일" min="1" max="365" className={`flex-1 ${inputClass}`} />
+              <button
+                type="submit"
+                disabled={!newName.trim()}
+                className="h-10 px-6 min-w-[120px] flex items-center justify-center gap-2 bg-electric text-white rounded-[4px] text-sm font-medium hover:bg-electric-hover disabled:opacity-40"
+              >
+                <Plus size={16} strokeWidth={2} /> 생성
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
       {/* Categories List */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">카테고리</h2>
-        </div>
+      <section>
+        <h2 className="text-xs font-medium text-silver tracking-[0.2em] uppercase mb-5">카테고리</h2>
         {categories.length === 0 ? (
-          <p className="p-4 text-sm text-gray-400 dark:text-gray-500">카테고리가 없습니다</p>
+          <p className="py-10 text-sm text-pewter dark:text-silver text-center">카테고리가 없습니다</p>
         ) : (
-          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+          <div className="divide-y divide-cloud dark:divide-surface-dark-alt">
             {categories.map((cat: any) => (
-              <div key={cat.id} className="px-4 py-3">
+              <div key={cat.id} className="py-4">
                 {editingId === cat.id ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input value={editData.name} onChange={e => setEditData({ ...editData, name: e.target.value })} className={inputClassSm} />
                     <input value={editData.description} onChange={e => setEditData({ ...editData, description: e.target.value })} className={inputClassSm} placeholder="설명" />
                     <input value={editData.icon} onChange={e => setEditData({ ...editData, icon: e.target.value })} className={inputClassSm} placeholder="아이콘" />
                     <div className="flex gap-2">
                       <input type="number" value={editData.decay_days} onChange={e => setEditData({ ...editData, decay_days: Number(e.target.value) })} className={`flex-1 ${inputClassSm}`} min="1" />
-                      <button onClick={() => updateMutation.mutate(cat.id)} className="p-1 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded">
-                        <Check size={16} />
+                      <button onClick={() => updateMutation.mutate(cat.id)} className="h-9 w-9 flex items-center justify-center rounded-[4px] text-electric hover:bg-ash dark:hover:bg-surface-dark">
+                        <Check size={16} strokeWidth={1.75} />
                       </button>
-                      <button onClick={() => setEditingId(null)} className="p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                        <X size={16} />
+                      <button onClick={() => setEditingId(null)} className="h-9 w-9 flex items-center justify-center rounded-[4px] text-pewter hover:bg-ash dark:hover:bg-surface-dark">
+                        <X size={16} strokeWidth={1.75} />
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">{cat.icon} {cat.name}</span>
+                      <span className="text-base font-medium text-carbon dark:text-canvas">{cat.icon} {cat.name}</span>
                       {cat.description && (
-                        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">- {cat.description}</span>
+                        <span className="text-sm text-pewter dark:text-silver ml-3">— {cat.description}</span>
                       )}
-                      <span className="text-xs text-gray-400 dark:text-gray-500 ml-2">({cat.decay_days}일 감소)</span>
+                      <span className="text-xs text-silver ml-3">({cat.decay_days}일 감소)</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => startEdit(cat)}
-                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="p-1.5 rounded-[4px] text-pewter hover:text-carbon dark:text-silver dark:hover:text-canvas"
                       >
-                        <Edit2 size={14} />
+                        <Edit2 size={14} strokeWidth={1.75} />
                       </button>
                       <button
                         onClick={() => setDeleteTarget({ id: cat.id, name: cat.name })}
-                        className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500"
+                        className="p-1.5 rounded-[4px] text-pewter hover:text-carbon dark:text-silver dark:hover:text-canvas"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={14} strokeWidth={1.75} />
                       </button>
                     </div>
                   </div>
@@ -197,23 +212,23 @@ export default function SettingsPage() {
             ))}
           </div>
         )}
-      </div>
+      </section>
 
       {/* Data Export/Import */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">데이터 관리</h2>
+      <section>
+        <h2 className="text-xs font-medium text-silver tracking-[0.2em] uppercase mb-5">데이터 관리</h2>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+            className="h-10 px-6 min-w-[160px] flex items-center justify-center gap-2 bg-electric text-white rounded-[4px] text-sm font-medium hover:bg-electric-hover"
           >
-            <Download size={16} /> JSON 내보내기
+            <Download size={16} strokeWidth={2} /> JSON 내보내기
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700"
+            className="h-10 px-6 min-w-[160px] flex items-center justify-center gap-2 text-graphite dark:text-pale bg-canvas dark:bg-surface-dark-alt border border-pale dark:border-surface-dark-alt rounded-[4px] text-sm font-medium hover:bg-ash dark:hover:bg-surface-dark"
           >
-            <Upload size={16} /> JSON 가져오기
+            <Upload size={16} strokeWidth={2} /> JSON 가져오기
           </button>
           <input
             ref={fileInputRef}
@@ -223,9 +238,10 @@ export default function SettingsPage() {
             className="hidden"
           />
         </div>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+        <p className="text-xs text-silver mt-4">
           가져오기 시 기존 데이터가 모두 대체됩니다. 먼저 내보내기로 백업하세요.
         </p>
+      </section>
       </div>
 
       {/* Delete Confirm Dialog */}
