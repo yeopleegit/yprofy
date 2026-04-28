@@ -190,7 +190,7 @@ export default function CategoryPage({ onLogSession }: Props) {
         <button
           type="submit"
           disabled={!newItemName.trim()}
-          className="h-10 px-6 min-w-[120px] flex items-center justify-center gap-2 bg-electric text-white rounded-[4px] text-sm font-medium hover:bg-electric-hover disabled:opacity-40"
+          className="h-10 px-6 min-w-[120px] flex items-center justify-center gap-2 bg-carbon text-canvas dark:bg-canvas dark:text-carbon rounded-[4px] text-sm font-medium hover:bg-graphite dark:hover:bg-pale disabled:opacity-40"
         >
           <Plus size={16} strokeWidth={2} /> 추가
         </button>
@@ -317,7 +317,7 @@ export default function CategoryPage({ onLogSession }: Props) {
                           className={`flex-1 ${inputClass}`}
                           autoFocus
                         />
-                        <button type="submit" className="h-10 px-5 text-sm font-medium text-white bg-electric rounded-[4px] hover:bg-electric-hover">
+                        <button type="submit" className="h-10 px-5 text-sm font-medium text-canvas dark:text-carbon bg-carbon dark:bg-canvas rounded-[4px] hover:bg-graphite dark:hover:bg-pale">
                           추가
                         </button>
                         <button
@@ -417,7 +417,7 @@ export default function CategoryPage({ onLogSession }: Props) {
               <button type="button" onClick={() => setEditItem(null)} className="h-10 px-6 min-w-[120px] text-sm font-medium text-graphite dark:text-pale bg-canvas dark:bg-surface-dark-alt border border-pale dark:border-surface-dark-alt rounded-[4px] hover:bg-ash dark:hover:bg-surface-dark">
                 취소
               </button>
-              <button type="submit" disabled={updateItemMutation.isPending} className="h-10 px-6 min-w-[120px] text-sm font-medium text-white bg-electric rounded-[4px] hover:bg-electric-hover disabled:opacity-50">
+              <button type="submit" disabled={updateItemMutation.isPending} className="h-10 px-6 min-w-[120px] text-sm font-medium text-canvas dark:text-carbon bg-carbon dark:bg-canvas rounded-[4px] hover:bg-graphite dark:hover:bg-pale disabled:opacity-50">
                 {updateItemMutation.isPending ? '저장 중...' : '저장'}
               </button>
             </div>
@@ -480,7 +480,7 @@ export default function CategoryPage({ onLogSession }: Props) {
               <button type="button" onClick={() => setEditSkill(null)} className="h-10 px-6 min-w-[120px] text-sm font-medium text-graphite dark:text-pale bg-canvas dark:bg-surface-dark-alt border border-pale dark:border-surface-dark-alt rounded-[4px] hover:bg-ash dark:hover:bg-surface-dark">
                 취소
               </button>
-              <button type="submit" disabled={updateSkillMutation.isPending} className="h-10 px-6 min-w-[120px] text-sm font-medium text-white bg-electric rounded-[4px] hover:bg-electric-hover disabled:opacity-50">
+              <button type="submit" disabled={updateSkillMutation.isPending} className="h-10 px-6 min-w-[120px] text-sm font-medium text-canvas dark:text-carbon bg-carbon dark:bg-canvas rounded-[4px] hover:bg-graphite dark:hover:bg-pale disabled:opacity-50">
                 {updateSkillMutation.isPending ? '저장 중...' : '저장'}
               </button>
             </div>

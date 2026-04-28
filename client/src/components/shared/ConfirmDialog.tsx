@@ -21,7 +21,7 @@ export default function ConfirmDialog({ title, message, confirmLabel = '삭제',
         </button>
         <button
           onClick={onConfirm}
-          className="h-10 px-6 min-w-[120px] text-sm font-medium text-white bg-electric rounded-[4px] hover:bg-electric-hover"
+          className="h-10 px-6 min-w-[120px] text-sm font-medium text-canvas dark:text-carbon bg-carbon dark:bg-canvas rounded-[4px] hover:bg-graphite dark:hover:bg-pale"
         >
           {confirmLabel}
         </button>

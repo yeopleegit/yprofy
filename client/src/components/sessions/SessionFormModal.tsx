@@ -204,7 +204,7 @@ export default function SessionFormModal({ skillId: initialSkillId, onClose }: P
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="h-10 px-6 min-w-[120px] text-sm font-medium text-white bg-electric rounded-[4px] hover:bg-electric-hover disabled:opacity-50"
+            className="h-10 px-6 min-w-[120px] text-sm font-medium text-canvas dark:text-carbon bg-carbon dark:bg-canvas rounded-[4px] hover:bg-graphite dark:hover:bg-pale disabled:opacity-50"
           >
             {mutation.isPending ? '저장 중...' : '기록하기'}
           </button>

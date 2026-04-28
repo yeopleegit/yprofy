@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/seed.ts","./src/db/connection.ts","./src/db/helpers.ts","./src/routes/categories.ts","./src/routes/dashboard.ts","./src/routes/data.ts","./src/routes/items.ts","./src/routes/sessions.ts","./src/routes/skills.ts"],"errors":true,"version":"5.9.3"}

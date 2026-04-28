@@ -19,8 +19,8 @@ function loadPeriod(): FrequencyPeriod {
 }
 
 const CATEGORY_PALETTE = [
-  '#3E6AE1', '#6366F1', '#7C3AED', '#A855F7', '#EC4899',
-  '#0891B2', '#0EA5E9', '#14B8A6', '#64748B', '#475569',
+  '#3E6AE1', '#5B85E8', '#7AA3F5', '#93B8F8', '#B8D0F9',
+  '#2952CC', '#1E40AF', '#1D4ED8', '#3458C7', '#60A5FA',
 ]
 
 function loadHiddenIds(): Set<number> {
@@ -118,7 +118,7 @@ export default function DashboardPage({ onLogSession }: Props) {
           <h1 className="text-4xl font-medium text-carbon dark:text-canvas">대시보드</h1>
           <button
             onClick={() => onLogSession()}
-            className="h-10 px-6 min-w-[160px] bg-electric text-white rounded-[4px] text-sm font-medium hover:bg-electric-hover"
+            className="h-10 px-6 min-w-[160px] bg-carbon text-canvas dark:bg-canvas dark:text-carbon rounded-[4px] text-sm font-medium hover:bg-graphite dark:hover:bg-pale"
           >
             연습 기록
           </button>

@@ -150,7 +150,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={!newName.trim()}
-                className="h-10 px-6 min-w-[120px] flex items-center justify-center gap-2 bg-electric text-white rounded-[4px] text-sm font-medium hover:bg-electric-hover disabled:opacity-40"
+                className="h-10 px-6 min-w-[120px] flex items-center justify-center gap-2 bg-carbon text-canvas dark:bg-canvas dark:text-carbon rounded-[4px] text-sm font-medium hover:bg-graphite dark:hover:bg-pale disabled:opacity-40"
               >
                 <Plus size={16} strokeWidth={2} /> 생성
               </button>
@@ -220,7 +220,7 @@ export default function SettingsPage() {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleExport}
-            className="h-10 px-6 min-w-[160px] flex items-center justify-center gap-2 bg-electric text-white rounded-[4px] text-sm font-medium hover:bg-electric-hover"
+            className="h-10 px-6 min-w-[160px] flex items-center justify-center gap-2 bg-carbon text-canvas dark:bg-canvas dark:text-carbon rounded-[4px] text-sm font-medium hover:bg-graphite dark:hover:bg-pale"
           >
             <Download size={16} strokeWidth={2} /> JSON 내보내기
           </button>

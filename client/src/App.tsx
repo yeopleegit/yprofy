@@ -239,7 +239,7 @@ function AppLayout() {
       <div className="px-5 pb-5 pt-4 space-y-3 border-t border-cloud dark:border-surface-dark-alt">
         <button
           onClick={() => openSessionModal()}
-          className="w-full flex items-center justify-center gap-2 h-10 px-4 bg-electric text-white rounded-[4px] text-sm font-medium hover:bg-electric-hover"
+          className="w-full flex items-center justify-center gap-2 h-10 px-4 bg-carbon text-canvas dark:bg-canvas dark:text-carbon rounded-[4px] text-sm font-medium hover:bg-graphite dark:hover:bg-pale"
         >
           <Plus size={16} strokeWidth={2} />
           연습 기록

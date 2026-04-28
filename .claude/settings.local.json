@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(git init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsx:*)",
+      "Bash(curl -s http://localhost:3001/api/v1/categories)",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/categories -H \"Content-Type: application/json\" -d '{\"name\":\"Flight Simulation\",\"description\":\"Combat flight sim proficiency\",\"icon\":\"✈️\",\"decay_days\":7}')",
+      "Bash(taskkill //F //IM \"node.exe\")",
+      "Bash(npm create:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/categories -H \"Content-Type: application/json\" -d '{\"name\":\"Flight Simulation\",\"description\":\"Combat flight sim\",\"icon\":\"F\",\"decay_days\":7}')",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/categories/1/items -H \"Content-Type: application/json\" -d '{\"name\":\"F-16C Viper\"}')",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/items/1/skills -H \"Content-Type: application/json\" -d '{\"name\":\"Takeoff\"}')",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/items/1/skills -H \"Content-Type: application/json\" -d '{\"name\":\"Landing\"}')",
+      "Bash(gh auth:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(curl -s http://localhost:3001/api/v1/dashboard/summary)",
+      "Bash(curl -s http://localhost:3001/api/v1/data/export)",
+      "Bash(git reset:*)",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/items/1/copy -H \"Content-Type: application/json\")",
+      "Bash(curl -s http://localhost:3001/api/v1/items/1)",
+      "Bash(curl:*)",
+      "Bash(git:*)",
+      "Bash(mv:*)",
+      "Bash(gh repo:*)",
+      "Bash(bash /c/Users/yeop_/.claude/statusline-command.sh)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(node:*)",
+      "Bash(npm run *)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 6544)",
+      "Bash(taskkill //F //PID 940)",
+      "Skill(keybindings-help)"
+    ]
+  }
+}
