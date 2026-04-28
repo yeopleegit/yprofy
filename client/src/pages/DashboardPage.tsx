@@ -19,8 +19,8 @@ function loadPeriod(): FrequencyPeriod {
 }
 
 const CATEGORY_PALETTE = [
-  '#3E6AE1', '#5B85E8', '#7AA3F5', '#93B8F8', '#B8D0F9',
-  '#2952CC', '#1E40AF', '#1D4ED8', '#3458C7', '#60A5FA',
+  '#3E6AE1', '#059669', '#D97706', '#DC2626', '#7C3AED',
+  '#0891B2', '#DB2777', '#65A30D', '#4F46E5', '#EA580C',
 ]
 
 function loadHiddenIds(): Set<number> {
