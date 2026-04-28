@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .fg { fill: #171A20; }
+    @media (prefers-color-scheme: dark) {
+      .fg { fill: #F4F4F4; }
+    }
+  </style>
+  <circle class="fg" cx="16" cy="10" r="7"/>
+  <path class="fg" d="M3 32 a13 13 0 0 1 26 0 z"/>
+</svg>
